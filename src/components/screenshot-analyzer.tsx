@@ -269,6 +269,11 @@ SELL (PUT) – erős trend lefelé, ár visszatesztelte EMA21-et, majd újra esi
       description: `Statisztika frissítve. Nyerési arány: ${newStats.winRate.toFixed(1)}%`,
       variant: result === 'win' ? "default" : "destructive"
     });
+
+    // Clear image after marking trade result
+    setTimeout(() => {
+      clearImage();
+    }, 2000); // Wait 2 seconds before clearing
   };
 
   const clearImage = () => {
