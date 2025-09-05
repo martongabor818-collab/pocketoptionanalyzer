@@ -37,8 +37,12 @@ export const ScreenshotAnalyzer = () => {
     const savedApiKey = localStorage.getItem('openai-api-key');
     if (savedApiKey) {
       setApiKey(savedApiKey);
+      toast({
+        title: "API kulcs betöltve",
+        description: "Mentett API kulcs sikeresen betöltve.",
+      });
     }
-  }, []);
+  }, [toast]);
 
   // Handle paste from clipboard
   React.useEffect(() => {
