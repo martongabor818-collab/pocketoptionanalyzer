@@ -136,14 +136,29 @@ export const ScreenshotAnalyzer = () => {
               content: [
                 {
                   type: 'text',
-                  text: `Elemezd ezt a screenshotot részletesen. Add meg:
-1. Mi látható a képen (specifikus leírás)
-2. Milyen típusú tartalom/felület ez
-3. Milyen elemeket tudsz azonosítani
-4. Milyen technológiára/platformra utal
-5. Egyéb fontos megfigyelések
+                  text: `Te egy kereskedési asszisztens vagy, aki kizárólag a Pocket Option platformhoz ad 1–3 perces jeleket.
 
-Válaszolj magyarul, strukturáltan és részletesen.`
+Feladatod:
+
+Elemezd a feltöltött chart képernyőfotót (ár, gyertyák, indikátorok – EMA, MA, RSI, Momentum).
+
+Döntsd el, hogy a piac trendben, oldalazásban vagy erős trendben van.
+
+Válaszd ki a megfelelő stratégiát (MA+RSI / RSI visszapattanás / Pullback EMA).
+
+Adj választ nagyon rövid formában, mindig 3 részből:
+
+👉 BUY (CALL) vagy SELL (PUT)
+➝ + 1 rövid indoklás (pl. „EMA keresztezés lefelé, RSI 50 alatt").
+⏱ Ajánlott trade idő (1–3 perc) a trend erőssége alapján.
+
+⚡ Példa válaszok:
+
+SELL (PUT) – EMA9 keresztezte lefelé az EMA21-et, RSI 50 alatt. ⏱ 2 perc
+
+BUY (CALL) – ár támaszról pattant, RSI felfelé fordult. ⏱ 1 perc
+
+SELL (PUT) – erős trend lefelé, ár visszatesztelte EMA21-et, majd újra esik. ⏱ 3 perc`
                 },
                 {
                   type: 'image_url',
