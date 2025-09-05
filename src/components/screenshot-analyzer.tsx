@@ -22,6 +22,39 @@ export const ScreenshotAnalyzer = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const { toast } = useToast();
 
+  // Handle paste from clipboard
+  React.useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              setUploadedImage(reader.result as string);
+              setFileName(`Beillesztett kép - ${new Date().toLocaleTimeString()}`);
+              setAnalysisResult(null);
+              toast({
+                title: "Kép beillesztve",
+                description: "A screenshot sikeresen beillesztésre került a vágólapról (Ctrl+V).",
+              });
+            };
+            reader.readAsDataURL(file);
+          }
+          break;
+        }
+      }
+    };
+
+    document.addEventListener('paste', handlePaste);
+    return () => document.removeEventListener('paste', handlePaste);
+  }, [toast]);
+
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
@@ -163,7 +196,7 @@ export const ScreenshotAnalyzer = () => {
                     {isDragActive ? 'Engedd el a fájlt itt' : 'Screenshot feltöltés'}
                   </h3>
                   <p className="text-muted-foreground">
-                    Húzd ide a fájlt vagy kattints a tallózáshoz
+                    Húzd ide a fájlt, kattints a tallózáshoz vagy használd a <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">Ctrl+V</kbd> billentyűkombinációt
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
                     PNG, JPG, JPEG, GIF, BMP, WebP formátumok támogatva
