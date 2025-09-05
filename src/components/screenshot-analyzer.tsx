@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Upload, Image, Sparkles, Eye, Download, Trash2 } from 'lucide-react';
+import { Upload, Image, Sparkles, Eye, Download, Trash2, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AnalysisResult {
@@ -14,13 +14,31 @@ interface AnalysisResult {
   details: string[];
 }
 
+interface OpenAIResponse {
+  choices: {
+    message: {
+      content: string;
+    };
+  }[];
+}
+
 export const ScreenshotAnalyzer = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [apiKey, setApiKey] = useState<string>('');
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const { toast } = useToast();
+
+  // Load saved API key
+  React.useEffect(() => {
+    const savedApiKey = localStorage.getItem('openai-api-key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
 
   // Handle paste from clipboard
   React.useEffect(() => {
@@ -81,10 +99,18 @@ export const ScreenshotAnalyzer = () => {
   });
 
   const analyzeScreenshot = async () => {
+    if (!apiKey) {
+      setShowApiKeyInput(true);
+      toast({
+        title: "API kulcs szükséges",
+        description: "Kérlek add meg az OpenAI API kulcsodat a képelemzéshez.",
+      });
+      return;
+    }
+
     setIsAnalyzing(true);
     setProgress(0);
     
-    // Simulate AI analysis with progress updates
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 90) {
@@ -93,62 +119,85 @@ export const ScreenshotAnalyzer = () => {
         }
         return prev + Math.random() * 15;
       });
-    }, 200);
+    }, 300);
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    clearInterval(progressInterval);
-    setProgress(100);
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: `Elemezd ezt a screenshotot részletesen. Add meg:
+1. Mi látható a képen (specifikus leírás)
+2. Milyen típusú tartalom/felület ez
+3. Milyen elemeket tudsz azonosítani
+4. Milyen technológiára/platformra utal
+5. Egyéb fontos megfigyelések
 
-    // Mock analysis result
-    const mockResults: AnalysisResult[] = [
-      {
-        type: "Webes felület",
-        content: "Ez egy modern webalkalmazás dashboardja vagy felhasználói felülete.",
-        confidence: 94,
-        details: [
-          "Responsz design elemek észlelve",
-          "Navigációs menü a bal oldalon",
-          "Sötét téma használata", 
-          "Interaktív elemek: gombok, inputok",
-          "Professzionális tipográfia"
-        ]
-      },
-      {
-        type: "Mobil alkalmazás",
-        content: "Egy mobilalkalmazás felhasználói felülete natív vagy hibrid technológiával.",
-        confidence: 87,
-        details: [
-          "Mobil-optimalizált layout",
-          "Touch-friendly gombok",
-          "Állapotsor látható",
-          "Tab navigáció az alján",
-          "Gesture-alapú interakciók"
-        ]
-      },
-      {
-        type: "Szöveges tartalom",
-        content: "A screenshot főként szöveges tartalmat tartalmaz, például dokumentum vagy cikk.",
-        confidence: 78,
-        details: [
-          "Strukturált szöveg formázás",
-          "Címsorok és bekezdések",
-          "Esetlegesen táblázatok",
-          "Linkek és kiemelések",
-          "Olvasható betűméret"
-        ]
+Válaszolj magyarul, strukturáltan és részletesen.`
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: uploadedImage!
+                  }
+                }
+              ]
+            }
+          ],
+          max_tokens: 1000
+        })
+      });
+
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      if (!response.ok) {
+        throw new Error(`API hiba: ${response.status}`);
       }
-    ];
 
-    const randomResult = mockResults[Math.floor(Math.random() * mockResults.length)];
-    setAnalysisResult(randomResult);
-    setIsAnalyzing(false);
+      const data: OpenAIResponse = await response.json();
+      const analysis = data.choices[0].message.content;
 
-    toast({
-      title: "Elemzés befejezve",
-      description: `A screenshot elemzése ${randomResult.confidence}% biztonsággal befejeződött.`,
-    });
+      // Parse the AI response into structured format
+      const lines = analysis.split('\n').filter(line => line.trim());
+      const type = lines.find(line => line.includes('típus') || line.includes('felület'))?.replace(/^\d+\.?\s*/, '') || 'Általános tartalom';
+      const content = lines.slice(0, 3).join(' ');
+      const details = lines.slice(1).filter(line => line.trim() && !line.includes('Válasz')).map(line => line.replace(/^\d+\.?\s*/, '').trim());
+
+      setAnalysisResult({
+        type: type.replace(/[^:]*:\s*/, ''),
+        content: content,
+        confidence: 95,
+        details: details.slice(0, 6)
+      });
+
+      toast({
+        title: "Elemzés befejezve",
+        description: "A screenshot AI elemzése sikeresen befejeződött.",
+      });
+
+    } catch (error) {
+      clearInterval(progressInterval);
+      setProgress(0);
+      console.error('API hiba:', error);
+      toast({
+        title: "Hiba történt",
+        description: "Az API hívás sikertelen. Ellenőrizd az API kulcsot.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const clearImage = () => {
@@ -230,6 +279,51 @@ export const ScreenshotAnalyzer = () => {
             )}
           </div>
         </Card>
+
+        {/* API Key Input */}
+        {showApiKeyInput && (
+          <Card className="p-6 bg-muted/50">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">OpenAI API Kulcs</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowApiKeyInput(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                A valódi AI elemzéshez szükséges az OpenAI API kulcs. Ez biztonságosan tárolódik a böngésződben.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  placeholder="sk-..."
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <Button 
+                  onClick={() => {
+                    if (apiKey) {
+                      localStorage.setItem('openai-api-key', apiKey);
+                      setShowApiKeyInput(false);
+                      toast({
+                        title: "API kulcs mentve",
+                        description: "Most már elemezhetsz screenshotokat!",
+                      });
+                    }
+                  }}
+                  disabled={!apiKey}
+                >
+                  Mentés
+                </Button>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Analysis Button */}
         {uploadedImage && !analysisResult && (
