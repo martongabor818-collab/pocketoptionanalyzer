@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Upload, Image, Sparkles, Eye, Download, Trash2, X } from 'lucide-react';
+import { Upload, Image, Sparkles, Eye, Download, Trash2, X, TrendingUp, TrendingDown, BarChart3, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AnalysisResult {
@@ -22,6 +22,13 @@ interface OpenAIResponse {
   }[];
 }
 
+interface TradeStats {
+  totalAnalyses: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+}
+
 export const ScreenshotAnalyzer = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
@@ -30,9 +37,16 @@ export const ScreenshotAnalyzer = () => {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [apiKey, setApiKey] = useState<string>('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [tradeStats, setTradeStats] = useState<TradeStats>({
+    totalAnalyses: 0,
+    wins: 0,
+    losses: 0,
+    winRate: 0
+  });
+  const [currentTradeResult, setCurrentTradeResult] = useState<'win' | 'loss' | null>(null);
   const { toast } = useToast();
 
-  // Load saved API key
+  // Load saved API key and stats
   React.useEffect(() => {
     const savedApiKey = localStorage.getItem('openai-api-key');
     if (savedApiKey) {
@@ -41,6 +55,13 @@ export const ScreenshotAnalyzer = () => {
         title: "API kulcs betöltve",
         description: "Mentett API kulcs sikeresen betöltve.",
       });
+    }
+
+    // Load saved stats
+    const savedStats = localStorage.getItem('trade-stats');
+    if (savedStats) {
+      const stats = JSON.parse(savedStats);
+      setTradeStats(stats);
     }
   }, [toast]);
 
@@ -114,6 +135,7 @@ export const ScreenshotAnalyzer = () => {
 
     setIsAnalyzing(true);
     setProgress(0);
+    setCurrentTradeResult(null);
     
     const progressInterval = setInterval(() => {
       setProgress(prev => {
@@ -200,6 +222,15 @@ SELL (PUT) – erős trend lefelé, ár visszatesztelte EMA21-et, majd újra esi
         details: details.slice(0, 6)
       });
 
+      // Update analysis count
+      const newStats = {
+        ...tradeStats,
+        totalAnalyses: tradeStats.totalAnalyses + 1,
+        winRate: tradeStats.totalAnalyses > 0 ? (tradeStats.wins / tradeStats.totalAnalyses) * 100 : 0
+      };
+      setTradeStats(newStats);
+      localStorage.setItem('trade-stats', JSON.stringify(newStats));
+
       toast({
         title: "Elemzés befejezve",
         description: "A screenshot AI elemzése sikeresen befejeződött.",
@@ -219,11 +250,33 @@ SELL (PUT) – erős trend lefelé, ár visszatesztelte EMA21-et, majd újra esi
     }
   };
 
+  const markTradeResult = (result: 'win' | 'loss') => {
+    if (currentTradeResult) return; // Prevent double marking
+
+    setCurrentTradeResult(result);
+    const newStats = {
+      ...tradeStats,
+      wins: result === 'win' ? tradeStats.wins + 1 : tradeStats.wins,
+      losses: result === 'loss' ? tradeStats.losses + 1 : tradeStats.losses,
+    };
+    newStats.winRate = newStats.totalAnalyses > 0 ? (newStats.wins / newStats.totalAnalyses) * 100 : 0;
+    
+    setTradeStats(newStats);
+    localStorage.setItem('trade-stats', JSON.stringify(newStats));
+
+    toast({
+      title: result === 'win' ? "Nyerő trade!" : "Vesztes trade",
+      description: `Statisztika frissítve. Nyerési arány: ${newStats.winRate.toFixed(1)}%`,
+      variant: result === 'win' ? "default" : "destructive"
+    });
+  };
+
   const clearImage = () => {
     setUploadedImage(null);
     setFileName('');
     setAnalysisResult(null);
     setProgress(0);
+    setCurrentTradeResult(null);
   };
 
   return (
@@ -243,6 +296,34 @@ SELL (PUT) – erős trend lefelé, ár visszatesztelte EMA21-et, majd újra esi
             felismeri az elemeket és hasznos információkat ad róla.
           </p>
         </div>
+
+        {/* Statistics */}
+        <Card className="p-6 bg-gradient-secondary">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Kereskedési Statisztikák
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-3 rounded-lg bg-card/50">
+              <div className="text-2xl font-bold text-primary">{tradeStats.totalAnalyses}</div>
+              <div className="text-sm text-muted-foreground">Elemzések</div>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-card/50">
+              <div className="text-2xl font-bold text-green-500">{tradeStats.wins}</div>
+              <div className="text-sm text-muted-foreground">Nyerő</div>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-card/50">
+              <div className="text-2xl font-bold text-red-500">{tradeStats.losses}</div>
+              <div className="text-sm text-muted-foreground">Vesztes</div>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-card/50">
+              <div className="text-2xl font-bold text-primary">{tradeStats.winRate.toFixed(1)}%</div>
+              <div className="text-sm text-muted-foreground">Nyerési arány</div>
+            </div>
+          </div>
+        </Card>
 
         {/* Upload Area */}
         <Card className="p-8 border-2 border-dashed border-border hover:border-primary/50 transition-colors">
@@ -424,7 +505,7 @@ SELL (PUT) – erős trend lefelé, ár visszatesztelte EMA21-et, majd újra esi
                 </div>
 
                 <div className="pt-4 border-t border-border/50">
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 mb-4">
                     <Button
                       onClick={() => analyzeScreenshot()}
                       variant="outline"
@@ -441,6 +522,38 @@ SELL (PUT) – erős trend lefelé, ár visszatesztelte EMA21-et, majd újra esi
                       <Upload className="w-4 h-4 mr-2" />
                       Új kép
                     </Button>
+                  </div>
+                  
+                  {/* Trade Result Buttons */}
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-medium text-center text-muted-foreground">
+                      Trade eredmény:
+                    </h4>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => markTradeResult('win')}
+                        disabled={currentTradeResult !== null}
+                        variant={currentTradeResult === 'win' ? "default" : "outline"}
+                        className={`flex-1 ${currentTradeResult === 'win' ? 'bg-green-500 hover:bg-green-600' : 'hover:bg-green-500/10 hover:text-green-500'}`}
+                      >
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Nyert
+                      </Button>
+                      <Button
+                        onClick={() => markTradeResult('loss')}
+                        disabled={currentTradeResult !== null}
+                        variant={currentTradeResult === 'loss' ? "default" : "outline"}
+                        className={`flex-1 ${currentTradeResult === 'loss' ? 'bg-red-500 hover:bg-red-600' : 'hover:bg-red-500/10 hover:text-red-500'}`}
+                      >
+                        <XCircle className="w-4 h-4 mr-2" />
+                        Veszett
+                      </Button>
+                    </div>
+                    {currentTradeResult && (
+                      <p className="text-sm text-center text-muted-foreground">
+                        Trade eredmény rögzítve: {currentTradeResult === 'win' ? '✅ Nyert' : '❌ Veszett'}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
