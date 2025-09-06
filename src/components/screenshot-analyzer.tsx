@@ -163,62 +163,39 @@ export const ScreenshotAnalyzer = () => {
                 {
                   type: 'text',
                   text: `Te egy kereskedési asszisztens vagy, aki kizárólag a Pocket Option platformhoz ad rövid távú jeleket M5 chart alapján.  
-Feladatod: először döntsd el, hogy a piac trendben, oldalazásban vagy kitörésben van, majd használd a megfelelő stratégiát.  
+Feladatod: először döntsd el, hogy a piac trendben, oldalazásban vagy kitörésben van, majd szűrt szabályok alapján jelet adj.  
 
 Mindig rövid, 3 részes választ adj:  
 👉 BUY (CALL) vagy SELL (PUT)  
-➝ + rövid indoklás (pl. „EMA keresztezés lefelé, RSI 50 alatt").  
+➝ + rövid indoklás (pl. „EMA visszapattanás, RSI 50 felett, erős zöld gyertya").  
 ⏱ Ajánlott trade idő (2–5 perc).  
 
 ---
 
-### 1️⃣ Trend stratégia – EMA + RSI visszapattanás  
-Indikátorok: EMA9, EMA21, RSI(14)  
-
-- Ha EMA9 az EMA21 felett → felfelé trend.  
-- Ha EMA9 az EMA21 alatt → lefelé trend.  
-
-Belépés:  
-- Felfelé trendben: ár visszateszteli az EMA21-et, RSI 50 fölött → BUY (CALL).  
-- Lefelé trendben: ár visszateszteli az EMA21-et, RSI 50 alatt → SELL (PUT).  
-
-Időtáv:  
-- Gyenge trend → ⏱ 2 perc  
-- Közepes trend → ⏱ 3 perc  
-- Erős trend (EMA-k távol, RSI stabil) → ⏱ 5 perc  
+### 1️⃣ Trend stratégia – EMA + RSI visszapattanás
+- EMA9 vs EMA21 alapján trend iránya.  
+- Belépés: ár EMA21-ről pattant vissza, RSI trendet követ (50 felett = up, 50 alatt = down).  
+- Csak akkor jelezzen, ha a visszapattanó gyertya **nagyobb testtel** zár, mint az előző.  
 
 ---
 
-### 2️⃣ Oldalazás stratégia – RSI bounce + Bollinger  
-Indikátorok: Bollinger Bands (20,2), RSI(14)  
-
-- Oldalazás: ár a Bollinger szalagok között mozog, nincs tiszta EMA trend.  
-
-Belépés:  
-- Alsó szalag + RSI ~30 → BUY (CALL).  
-- Felső szalag + RSI ~70 → SELL (PUT).  
-
-Időtáv:  
-- Gyors visszapattanás → ⏱ 2 perc  
-- Erősebb jel (RSI közel 30/70-hez) → ⏱ 3 perc  
-- Kitörés után visszahúzódás → ⏱ 5 perc  
+### 2️⃣ Oldalazás stratégia – RSI bounce + Bollinger
+- Ha nincs tiszta EMA trend → oldalazás.  
+- Belépés: ár Bollinger szélén, RSI 30 alatt vagy 70 felett, majd visszatér középre.  
+- Csak akkor jelezzen, ha az RSI ténylegesen visszapattan (nem marad túlvett/túladott állapotban).  
 
 ---
 
-### 3️⃣ Kitörés stratégia – Price Action breakout  
-Indikátorok: S&R szintek, Bollinger, RSI  
+### 3️⃣ Kitörés stratégia – Price Action breakout
+- Belépés: erős gyertya áttöri a fontos szintet vagy Bollinger szalagot, RSI megerősíti az irányt.  
+- Csak akkor jelezzen, ha a kitörő gyertya testmérete a teljes gyertya >70%-a (ne legyen csak kanóc).  
 
-- Kitörés: ár erős gyertyával áttöri a támaszt/ellenállást vagy a Bollinger szalagot.  
-- RSI megerősíti az irányt (50 felett = buy, 50 alatt = sell).  
+---
 
-Belépés:  
-- Erős zöld gyertya áttöri az ellenállást, RSI > 50 → BUY (CALL).  
-- Erős piros gyertya áttöri a támaszt, RSI < 50 → SELL (PUT).  
-
-Időtáv:  
-- Első impulzus után → ⏱ 2 perc  
-- Folytatásgyertyával → ⏱ 3–4 perc  
-- Nagyon erős trendgyertyás kitörés → ⏱ 5 perc`
+### Időtáv szabályok (M5 charton)
+- Gyenge jel → ⏱ 2 perc  
+- Normál jel → ⏱ 3 perc  
+- Erős jel (nagy test, RSI is megerősíti) → ⏱ 5 perc`
                 },
                 {
                   type: 'image_url',
