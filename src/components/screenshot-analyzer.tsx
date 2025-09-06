@@ -7,6 +7,8 @@ import { Progress } from '@/components/ui/progress';
 import { Upload, Image, Sparkles, Eye, Download, Trash2, X, TrendingUp, TrendingDown, BarChart3, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AnalysisResult {
   type: string;
@@ -36,8 +38,6 @@ export const ScreenshotAnalyzer = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [apiKey, setApiKey] = useState<string>('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [tradeStats, setTradeStats] = useState<TradeStats>({
     totalAnalyses: 0,
     wins: 0,
@@ -46,25 +46,16 @@ export const ScreenshotAnalyzer = () => {
   });
   const [currentTradeResult, setCurrentTradeResult] = useState<'win' | 'loss' | null>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  // Load saved API key and stats
+  // Load saved stats
   React.useEffect(() => {
-    const savedApiKey = localStorage.getItem('openai-api-key');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-      toast({
-        title: "API kulcs betöltve",
-        description: "Mentett API kulcs sikeresen betöltve.",
-      });
-    }
-
-    // Load saved stats
     const savedStats = localStorage.getItem('trade-stats');
     if (savedStats) {
       const stats = JSON.parse(savedStats);
       setTradeStats(stats);
     }
-  }, [toast]);
+  }, []);
 
   // Handle paste from clipboard
   React.useEffect(() => {
@@ -125,11 +116,20 @@ export const ScreenshotAnalyzer = () => {
   });
 
   const analyzeScreenshot = async () => {
-    if (!apiKey) {
-      setShowApiKeyInput(true);
+    if (!user) {
       toast({
-        title: "API kulcs szükséges",
-        description: "Kérlek add meg az OpenAI API kulcsodat a képelemzéshez.",
+        title: "Bejelentkezés szükséges",
+        description: "Kérlek jelentkezz be a képelemzéshez.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!uploadedImage) {
+      toast({
+        title: "Nincs kép",
+        description: "Kérlek tölts fel egy képet először.",
+        variant: "destructive",
       });
       return;
     }
@@ -149,88 +149,33 @@ export const ScreenshotAnalyzer = () => {
     }, 300);
 
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: `Te egy kereskedési asszisztens vagy, aki kizárólag a Pocket Option platformhoz ad rövid távú jeleket M5 chart alapján.  
-Feladatod: először döntsd el, hogy a piac trendben, oldalazásban vagy kitörésben van, majd szűrt szabályok alapján jelet adj.  
-
-Mindig rövid, 3 részes választ adj:  
-👉 BUY (CALL) vagy SELL (PUT)  
-➝ + rövid indoklás (pl. „EMA visszapattanás, RSI 50 felett, erős zöld gyertya").  
-⏱ Ajánlott trade idő (2–5 perc).  
-
----
-
-### 1️⃣ Trend stratégia – EMA + RSI visszapattanás
-- EMA9 vs EMA21 alapján trend iránya.  
-- Belépés: ár EMA21-ről pattant vissza, RSI trendet követ (50 felett = up, 50 alatt = down).  
-- Csak akkor jelezzen, ha a visszapattanó gyertya **nagyobb testtel** zár, mint az előző.  
-
----
-
-### 2️⃣ Oldalazás stratégia – RSI bounce + Bollinger
-- Ha nincs tiszta EMA trend → oldalazás.  
-- Belépés: ár Bollinger szélén, RSI 30 alatt vagy 70 felett, majd visszatér középre.  
-- Csak akkor jelezzen, ha az RSI ténylegesen visszapattan (nem marad túlvett/túladott állapotban).  
-
----
-
-### 3️⃣ Kitörés stratégia – Price Action breakout
-- Belépés: erős gyertya áttöri a fontos szintet vagy Bollinger szalagot, RSI megerősíti az irányt.  
-- Csak akkor jelezzen, ha a kitörő gyertya testmérete a teljes gyertya >70%-a (ne legyen csak kanóc).  
-
----
-
-### Időtáv szabályok (M5 charton)
-- Gyenge jel → ⏱ 2 perc  
-- Normál jel → ⏱ 3 perc  
-- Erős jel (nagy test, RSI is megerősíti) → ⏱ 5 perc`
-                },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: uploadedImage!
-                  }
-                }
-              ]
-            }
-          ],
-          max_tokens: 1000
-        })
+      const { data, error } = await supabase.functions.invoke('analyze-screenshot', {
+        body: { imageData: uploadedImage }
       });
 
       clearInterval(progressInterval);
       setProgress(100);
 
-      if (!response.ok) {
-        throw new Error(`API hiba: ${response.status}`);
+      if (error) {
+        console.error('Analysis error:', error);
+        throw new Error(error.message || 'Failed to analyze screenshot');
       }
 
-      const data: OpenAIResponse = await response.json();
-      const analysis = data.choices[0].message.content;
+      if (!data?.analysis) {
+        throw new Error('Invalid response from analysis service');
+      }
 
       // Parse the AI response into structured format
+      const analysis = data.analysis.content;
       const lines = analysis.split('\n').filter(line => line.trim());
-      const type = lines.find(line => line.includes('típus') || line.includes('felület'))?.replace(/^\d+\.?\s*/, '') || 'Általános tartalom';
+      const type = lines.find(line => line.includes('BUY') || line.includes('SELL') || line.includes('CALL') || line.includes('PUT'))?.replace(/^\d+\.?\s*/, '') || 'Általános tartalom';
       const content = lines.slice(0, 3).join(' ');
       const details = lines.slice(1).filter(line => line.trim() && !line.includes('Válasz')).map(line => line.replace(/^\d+\.?\s*/, '').trim());
 
       setAnalysisResult({
         type: type.replace(/[^:]*:\s*/, ''),
         content: content,
-        confidence: 95,
+        confidence: data.analysis.confidence || 95,
         details: details.slice(0, 6)
       });
 
@@ -252,9 +197,21 @@ Mindig rövid, 3 részes választ adj:
       clearInterval(progressInterval);
       setProgress(0);
       console.error('API hiba:', error);
+      
+      let errorMessage = 'Az API hívás sikertelen.';
+      if (error instanceof Error) {
+        if (error.message.includes('Unauthorized')) {
+          errorMessage = 'Hitelesítési hiba. Kérlek jelentkezz be újra.';
+        } else if (error.message.includes('Invalid image')) {
+          errorMessage = 'Érvénytelen képformátum vagy méret. Használj JPEG, PNG, GIF vagy WebP formátumot, maximum 10MB méretben.';
+        } else if (error.message.includes('rate limit')) {
+          errorMessage = 'Túl sok kérés. Kérlek próbáld újra később.';
+        }
+      }
+      
       toast({
         title: "Hiba történt",
-        description: "Az API hívás sikertelen. Ellenőrizd az API kulcsot.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -400,50 +357,6 @@ Mindig rövid, 3 részes választ adj:
           </div>
         </Card>
 
-        {/* API Key Input */}
-        {showApiKeyInput && (
-          <Card className="p-6 bg-muted/50">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">OpenAI API Key</h3>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => setShowApiKeyInput(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                An OpenAI API key is required for real AI analysis. It's stored securely in your browser.
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  placeholder="sk-..."
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <Button 
-                  onClick={() => {
-                    if (apiKey) {
-                      localStorage.setItem('openai-api-key', apiKey);
-                      setShowApiKeyInput(false);
-                      toast({
-                        title: "API key saved",
-                        description: "You can now analyze screenshots!",
-                      });
-                    }
-                  }}
-                  disabled={!apiKey}
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
-          </Card>
-        )}
 
         {/* Analysis Button */}
         {uploadedImage && !analysisResult && (

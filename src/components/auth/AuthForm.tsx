@@ -7,11 +7,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, Lock } from 'lucide-react';
+import { PasswordStrengthValidator } from './PasswordStrengthValidator';
 
 export const AuthForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   const { signUp, signIn } = useAuth();
   const { toast } = useToast();
 
@@ -20,6 +22,16 @@ export const AuthForm = () => {
       toast({
         title: "Missing Information",
         description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Additional validation for signup
+    if (mode === 'signup' && !isPasswordValid) {
+      toast({
+        title: "Password too weak",
+        description: "Please ensure your password meets all security requirements.",
         variant: "destructive",
       });
       return;
@@ -141,11 +153,15 @@ export const AuthForm = () => {
                     className="pl-10"
                   />
                 </div>
+                <PasswordStrengthValidator 
+                  password={password} 
+                  onValidityChange={setIsPasswordValid}
+                />
               </div>
               <Button
                 onClick={() => handleSubmit('signup')}
                 className="w-full"
-                disabled={loading}
+                disabled={loading || (password && !isPasswordValid)}
               >
                 {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 Create Account
