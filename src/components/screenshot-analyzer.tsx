@@ -154,9 +154,12 @@ export const ScreenshotAnalyzer = () => {
       }
 
       console.log('analyzeScreenshot: Full data object:', data);
+      console.log('analyzeScreenshot: Data keys:', Object.keys(data || {}));
+      console.log('analyzeScreenshot: Data type:', typeof data);
       
       if (!data?.analysis) {
         console.error('analyzeScreenshot: No analysis in data:', data);
+        console.error('analyzeScreenshot: Available data properties:', Object.keys(data || {}));
         throw new Error('Invalid response from analysis service');
       }
 
