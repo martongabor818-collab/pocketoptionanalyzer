@@ -176,12 +176,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_trading_stats: {
+        Row: {
+          created_at: string
+          id: string
+          losses: number
+          total_trades: number
+          updated_at: string
+          user_id: string
+          win_rate: number | null
+          wins: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          losses?: number
+          total_trades?: number
+          updated_at?: string
+          user_id: string
+          win_rate?: number | null
+          wins?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          losses?: number
+          total_trades?: number
+          updated_at?: string
+          user_id?: string
+          win_rate?: number | null
+          wins?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_trading_stats: {
+        Args: { p_is_win: boolean; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

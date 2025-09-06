@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useTradingStats } from '@/hooks/useTradingStats';
 
 interface AnalysisResult {
   type: string;
@@ -25,37 +26,16 @@ interface OpenAIResponse {
   }[];
 }
 
-interface TradeStats {
-  totalAnalyses: number;
-  wins: number;
-  losses: number;
-  winRate: number;
-}
-
 export const ScreenshotAnalyzer = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
-  const [tradeStats, setTradeStats] = useState<TradeStats>({
-    totalAnalyses: 0,
-    wins: 0,
-    losses: 0,
-    winRate: 0
-  });
   const [currentTradeResult, setCurrentTradeResult] = useState<'win' | 'loss' | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-
-  // Load saved stats
-  React.useEffect(() => {
-    const savedStats = localStorage.getItem('trade-stats');
-    if (savedStats) {
-      const stats = JSON.parse(savedStats);
-      setTradeStats(stats);
-    }
-  }, []);
+  const { stats: tradeStats, loading: statsLoading, updateStats } = useTradingStats();
 
   // Handle paste from clipboard
   React.useEffect(() => {
@@ -179,14 +159,7 @@ export const ScreenshotAnalyzer = () => {
         details: details.slice(0, 6)
       });
 
-      // Update analysis count
-      const newStats = {
-        ...tradeStats,
-        totalAnalyses: tradeStats.totalAnalyses + 1,
-        winRate: tradeStats.totalAnalyses > 0 ? (tradeStats.wins / tradeStats.totalAnalyses) * 100 : 0
-      };
-      setTradeStats(newStats);
-      localStorage.setItem('trade-stats', JSON.stringify(newStats));
+      // Analysis count is now tracked automatically in the database
 
       toast({
         title: "Elemzés befejezve",
@@ -219,23 +192,17 @@ export const ScreenshotAnalyzer = () => {
     }
   };
 
-  const markTradeResult = (result: 'win' | 'loss') => {
+  const markTradeResult = async (result: 'win' | 'loss') => {
     if (currentTradeResult) return; // Prevent double marking
 
     setCurrentTradeResult(result);
-    const newStats = {
-      ...tradeStats,
-      wins: result === 'win' ? tradeStats.wins + 1 : tradeStats.wins,
-      losses: result === 'loss' ? tradeStats.losses + 1 : tradeStats.losses,
-    };
-    newStats.winRate = newStats.totalAnalyses > 0 ? (newStats.wins / newStats.totalAnalyses) * 100 : 0;
     
-    setTradeStats(newStats);
-    localStorage.setItem('trade-stats', JSON.stringify(newStats));
+    // Update stats in database
+    await updateStats(result === 'win');
 
     toast({
       title: result === 'win' ? "Nyerő trade!" : "Vesztes trade",
-      description: `Statisztika frissítve. Nyerési arány: ${newStats.winRate.toFixed(1)}%`,
+      description: `Statisztika frissítve. Nyerési arány: ${tradeStats.win_rate.toFixed(1)}%`,
       variant: result === 'win' ? "default" : "destructive"
     });
 
@@ -284,7 +251,7 @@ export const ScreenshotAnalyzer = () => {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-3 rounded-lg bg-card/50">
-              <div className="text-2xl font-bold text-primary">{tradeStats.totalAnalyses}</div>
+              <div className="text-2xl font-bold text-primary">{tradeStats.total_trades}</div>
               <div className="text-sm text-muted-foreground">Analyses</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-card/50">
@@ -296,7 +263,7 @@ export const ScreenshotAnalyzer = () => {
               <div className="text-sm text-muted-foreground">Losses</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-card/50">
-              <div className="text-2xl font-bold text-primary">{tradeStats.winRate.toFixed(1)}%</div>
+              <div className="text-2xl font-bold text-primary">{tradeStats.win_rate.toFixed(1)}%</div>
               <div className="text-sm text-muted-foreground">Win Rate</div>
             </div>
           </div>
