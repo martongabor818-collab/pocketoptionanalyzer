@@ -56,9 +56,32 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({
             }`}>
               Signal: {result.type}
             </h4>
-            <p className="text-foreground/90 leading-relaxed">
-              {result.content}
-            </p>
+            {/* Main Analysis Content */}
+            <div className="p-4 rounded-lg bg-card/30 border border-border/50 mb-4">
+              <p className="text-foreground/90 leading-relaxed">
+                {result.content.length > 200 ? result.content.substring(0, 200) + '...' : result.content}
+              </p>
+            </div>
+
+            {/* Quick Info */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              {result.timeframe && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Trade Duration:</span>
+                  <Badge variant="secondary" className="font-bold">
+                    {result.timeframe}
+                  </Badge>
+                </div>
+              )}
+              {result.riskLevel && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">Risk Level:</span>
+                  <Badge variant={result.riskLevel === 'LOW' ? 'default' : result.riskLevel === 'MEDIUM' ? 'secondary' : 'destructive'}>
+                    {result.riskLevel}
+                  </Badge>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Key Trading Levels */}

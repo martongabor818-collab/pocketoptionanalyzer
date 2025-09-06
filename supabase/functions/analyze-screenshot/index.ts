@@ -105,7 +105,9 @@ BUY
 - **Pattern:** Cup and handle formation completing
 - **Volume:** Increasing on breakout
 - **Momentum:** Strong upward momentum confirmed
+- **Moving Averages:** Price above 20-MA, bullish crossover
 - **Key Factor:** Price breaking above 20-period MA with volume
+- **Market Condition:** Strong uptrend with increasing volume
 
 ### ENTRY POINT
 174.90 (current market price)
@@ -120,10 +122,10 @@ BUY
 MEDIUM - Clear pattern but watch for reversal at resistance
 
 ### TIMEFRAME
-5-15 minutes
+5 minutes (recommended for M5 chart binary options)
 
 ### REASONING
-Price has broken above the 20-period moving average with strong volume. The cup and handle pattern is completing, indicating bullish momentum. Entry at current levels with target at next resistance zone offers good risk/reward for a short-term BUY position.
+Price has broken above the 20-period moving average with strong volume. The cup and handle pattern is completing, indicating bullish momentum. Entry at current levels with target at next resistance zone offers good risk/reward for a short-term BUY position. Recommended 5-minute binary option based on M5 chart timeframe and current momentum.
 
 IMPORTANT: Always give either BUY or SELL recommendation. Never say "ANALYSIS" or give generic advice. Be specific about what you see in the chart.`;
 
