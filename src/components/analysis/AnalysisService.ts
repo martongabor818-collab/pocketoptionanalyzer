@@ -35,40 +35,47 @@ export class AnalysisService {
 
   private static parseAnalysisResponse(analysis: any): AnalysisResponse {
     const content = analysis.content || '';
+    console.log('Parsing content:', content);
     const lines = content.split('\n').filter((line: string) => line.trim());
     
     // Extract signal type more aggressively
     let type = 'BUY Signal'; // Default to BUY
     
-    // Look for explicit BUY/SELL mentions
-    const signalTypeSection = content.match(/###\s*SIGNAL TYPE[:\s]*([^\n#]+)/i);
+    // Look for explicit BUY/SELL mentions in various formats
+    const signalTypeSection = content.match(/###\s*SIGNAL TYPE[:\s]*([^\n#]+)/i) ||
+                             content.match(/###\s*JELTÍPUS[:\s]*([^\n#]+)/i) ||
+                             content.match(/👉\s*([^\n]+)/i);
+    
     if (signalTypeSection) {
       const signalText = signalTypeSection[1].trim().toUpperCase();
-      if (signalText.includes('SELL')) {
+      console.log('Found signal text:', signalText);
+      if (signalText.includes('SELL') || signalText.includes('PUT')) {
         type = 'SELL Signal';
-      } else if (signalText.includes('BUY')) {
+      } else if (signalText.includes('BUY') || signalText.includes('CALL')) {
         type = 'BUY Signal';
       }
     } else {
       // Fallback: scan entire content for BUY/SELL
-      const sellCount = (content.toUpperCase().match(/SELL/g) || []).length;
-      const buyCount = (content.toUpperCase().match(/BUY/g) || []).length;
+      const sellCount = (content.toUpperCase().match(/SELL|PUT/g) || []).length;
+      const buyCount = (content.toUpperCase().match(/BUY|CALL/g) || []).length;
       
       if (sellCount > buyCount) {
         type = 'SELL Signal';
       }
     }
+    console.log('Final signal type:', type);
 
     // Extract structured data if available
-    const entryPoint = analysis.details?.entryPoint || this.extractValue(content, 'ENTRY POINT');
-    const targetPrice = analysis.details?.targetPrice || this.extractValue(content, 'TARGET PRICE');
+    const entryPoint = analysis.details?.entryPoint || this.extractValue(content, 'ENTRY POINT') || this.extractValue(content, 'BELÉPÉSI PONT');
+    const targetPrice = analysis.details?.targetPrice || this.extractValue(content, 'TARGET PRICE') || this.extractValue(content, 'CÉL ÁR');
     const stopLoss = analysis.details?.stopLoss || this.extractValue(content, 'STOP LOSS');
-    const riskLevel = analysis.details?.riskLevel || this.extractValue(content, 'RISK ASSESSMENT');
-    const timeframe = analysis.details?.timeframe || this.extractValue(content, 'TIMEFRAME');
-    const reasoning = analysis.details?.reasoning || this.extractValue(content, 'REASONING');
+    const riskLevel = analysis.details?.riskLevel || this.extractValue(content, 'RISK ASSESSMENT') || this.extractValue(content, 'KOCKÁZAT');
+    const timeframe = analysis.details?.timeframe || this.extractValue(content, 'TIMEFRAME') || this.extractValue(content, 'IDŐKERET') || this.extractValue(content, '⏱');
+    const reasoning = analysis.details?.reasoning || this.extractValue(content, 'REASONING') || this.extractValue(content, 'INDOKLÁS') || this.extractValue(content, '➝');
 
     console.log('Analysis details:', analysis.details);
     console.log('Extracted reasoning:', reasoning);
+    console.log('Extracted timeframe:', timeframe);
 
     // Create detailed analysis points
     const details = this.extractAnalysisDetails(content);
@@ -76,6 +83,7 @@ export class AnalysisService {
     // Extract confidence more reliably
     let confidence = 75; // Default
     const confidenceMatch = content.match(/###\s*CONFIDENCE[:\s]*(\d+)%?/i) || 
+                           content.match(/###\s*MEGBÍZHATÓSÁG[:\s]*(\d+)%?/i) ||
                            content.match(/(\d+)%\s*confidence/i);
     if (confidenceMatch) {
       confidence = parseInt(confidenceMatch[1]) || 75;
@@ -112,7 +120,20 @@ export class AnalysisService {
     const patterns = [
       new RegExp(`###\\s*${field}[:\\s]*([^#\n]+)`, 'i'),
       new RegExp(`${field}[:\\s]*([^\n]+)`, 'i'),
-      new RegExp(`\\*\\*${field}\\*\\*[:\\s]*([^\n]+)`, 'i')
+      new RegExp(`\\*\\*${field}\\*\\*[:\\s]*([^\n]+)`, 'i'),
+      // Hungarian patterns
+      new RegExp(`###\\s*JELTÍPUS[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*MEGBÍZHATÓSÁG[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*ELEMZÉS[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*BELÉPÉSI\\s*PONT[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*CÉL\\s*ÁR[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*STOP\\s*LOSS[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*KOCKÁZAT[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*IDŐKERET[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*INDOKLÁS[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`👉\\s*([^\n]+)`, 'i'),
+      new RegExp(`➝\\s*([^\n]+)`, 'i'),
+      new RegExp(`⏱\\s*([^\n]+)`, 'i')
     ];
 
     for (const pattern of patterns) {
