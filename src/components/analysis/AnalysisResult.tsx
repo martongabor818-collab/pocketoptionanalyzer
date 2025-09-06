@@ -47,7 +47,13 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({
 
         <div className="space-y-4">
           <div>
-            <h4 className="text-lg font-semibold text-primary mb-2">
+            <h4 className={`text-lg font-semibold mb-2 ${
+              result.type.toUpperCase().includes('BUY') 
+                ? 'text-green-500' 
+                : result.type.toUpperCase().includes('SELL')
+                ? 'text-red-500'
+                : 'text-primary'
+            }`}>
               Signal: {result.type}
             </h4>
             <p className="text-foreground/90 leading-relaxed">
