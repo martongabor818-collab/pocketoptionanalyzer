@@ -36,18 +36,26 @@ export class AnalysisService {
     const content = analysis.content || '';
     const lines = content.split('\n').filter((line: string) => line.trim());
     
-    // Extract signal type - look for BUY, SELL, or specific keywords
-    const signalLine = lines.find((line: string) => 
-      line.toUpperCase().includes('BUY') || 
-      line.toUpperCase().includes('SELL') || 
-      line.toUpperCase().includes('SIGNAL TYPE')
-    );
+    // Extract signal type more aggressively
+    let type = 'BUY Signal'; // Default to BUY
     
-    let type = 'ANALYSIS';
-    if (signalLine) {
-      if (signalLine.toUpperCase().includes('BUY')) type = 'BUY Signal';
-      else if (signalLine.toUpperCase().includes('SELL')) type = 'SELL Signal';
-      else if (signalLine.toUpperCase().includes('NEUTRAL')) type = 'NEUTRAL Signal';
+    // Look for explicit BUY/SELL mentions
+    const signalTypeSection = content.match(/###\s*SIGNAL TYPE[:\s]*([^\n#]+)/i);
+    if (signalTypeSection) {
+      const signalText = signalTypeSection[1].trim().toUpperCase();
+      if (signalText.includes('SELL')) {
+        type = 'SELL Signal';
+      } else if (signalText.includes('BUY')) {
+        type = 'BUY Signal';
+      }
+    } else {
+      // Fallback: scan entire content for BUY/SELL
+      const sellCount = (content.toUpperCase().match(/SELL/g) || []).length;
+      const buyCount = (content.toUpperCase().match(/BUY/g) || []).length;
+      
+      if (sellCount > buyCount) {
+        type = 'SELL Signal';
+      }
     }
 
     // Extract structured data if available
@@ -61,10 +69,18 @@ export class AnalysisService {
     // Create detailed analysis points
     const details = this.extractAnalysisDetails(content);
 
+    // Extract confidence more reliably
+    let confidence = 75; // Default
+    const confidenceMatch = content.match(/###\s*CONFIDENCE[:\s]*(\d+)%?/i) || 
+                           content.match(/(\d+)%\s*confidence/i);
+    if (confidenceMatch) {
+      confidence = parseInt(confidenceMatch[1]) || 75;
+    }
+
     return {
       type,
       content: this.getMainContent(content),
-      confidence: analysis.confidence || 75,
+      confidence,
       details,
       entryPoint,
       targetPrice,

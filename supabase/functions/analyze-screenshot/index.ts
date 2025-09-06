@@ -81,47 +81,51 @@ serve(async (req) => {
       });
     }
 
-    const detailedPrompt = `You are a professional trading chart analyst. Analyze this trading chart image and provide specific technical analysis.
+    const detailedPrompt = `You are a professional binary options trader analyzing a PocketOption trading chart. Look at this M5 chart and provide a specific trading recommendation.
 
-IMPORTANT: Look carefully at the price levels, candlestick patterns, moving averages, support/resistance levels, and any visible indicators in the chart.
+CRITICAL INSTRUCTIONS:
+- You MUST choose either BUY or SELL (never "ANALYSIS" or "NEUTRAL")
+- Provide specific price levels visible in the chart
+- Give actionable trading advice based on technical patterns
+- Focus on short-term binary options signals (5-15 minute trades)
 
-Respond in this EXACT format:
+Analyze the chart and respond in this EXACT format:
 
 ### SIGNAL TYPE
-[Write either "BUY", "SELL", or "NEUTRAL" based on technical analysis]
+BUY
 
 ### CONFIDENCE
-[Write a number between 60-95]%
+85%
 
 ### ANALYSIS
-- **Current Price:** [State the current price level you can see]
-- **Support Level:** [Identify the nearest support price level]  
-- **Resistance Level:** [Identify the nearest resistance price level]
-- **Trend Direction:** [Bullish/Bearish/Sideways with explanation]
-- **Moving Averages:** [Describe MA positions and any crossovers]
-- **Chart Pattern:** [Identify patterns like breakout, triangle, channel, etc.]
-- **Momentum:** [Describe price momentum and volume if visible]
-- **Key Observation:** [Most important technical factor for the signal]
+- **Current Price:** 174.85 (example - use actual price from chart)
+- **Support Level:** 174.20 (nearest support visible)
+- **Resistance Level:** 175.40 (nearest resistance visible)
+- **Trend:** Bullish breakout above moving average
+- **Pattern:** Cup and handle formation completing
+- **Volume:** Increasing on breakout
+- **Momentum:** Strong upward momentum confirmed
+- **Key Factor:** Price breaking above 20-period MA with volume
 
 ### ENTRY POINT
-[Give specific price level for entry, like "174.50" or "Current market price"]
+174.90 (current market price)
 
 ### TARGET PRICE
-[Give specific target price level, like "175.20"]
+175.30 (resistance level)
 
-### STOP LOSS  
-[Give specific stop loss price level, like "174.00"]
+### STOP LOSS
+174.40 (below support)
 
 ### RISK ASSESSMENT
-[Write "LOW", "MEDIUM", or "HIGH"] - [Brief explanation why]
+MEDIUM - Clear pattern but watch for reversal at resistance
 
 ### TIMEFRAME
-[Write timeframe like "5-15 minutes", "1-2 hours", "few hours", etc.]
+5-15 minutes
 
 ### REASONING
-[2-3 sentences explaining the main technical reasons for this signal based on what you observe in the chart]
+Price has broken above the 20-period moving average with strong volume. The cup and handle pattern is completing, indicating bullish momentum. Entry at current levels with target at next resistance zone offers good risk/reward for a short-term BUY position.
 
-CRITICAL: Base your analysis on what you can actually see in the chart image. Provide specific price levels, not generic advice.`;
+IMPORTANT: Always give either BUY or SELL recommendation. Never say "ANALYSIS" or give generic advice. Be specific about what you see in the chart.`;
 
     console.log('Making OpenAI API request for user:', user.id);
 
