@@ -34,14 +34,17 @@ export const ScreenshotAnalyzer = () => {
           const file = item.getAsFile();
           if (file) {
             const reader = new FileReader();
-            reader.onload = () => {
-              setUploadedImage(reader.result as string);
+            reader.onload = async () => {
+              const imageData = reader.result as string;
+              setUploadedImage(imageData);
               setFileName(`Pasted Image - ${new Date().toLocaleTimeString()}`);
               clearAnalysis();
               toast({
                 title: "Image Pasted",
-                description: "Screenshot pasted from clipboard (Ctrl+V).",
+                description: "Screenshot pasted from clipboard. Starting analysis...",
               });
+              // Automatically start analysis
+              await analyzeImage(imageData);
             };
             reader.readAsDataURL(file);
           }
@@ -52,24 +55,27 @@ export const ScreenshotAnalyzer = () => {
 
     document.addEventListener('paste', handlePaste);
     return () => document.removeEventListener('paste', handlePaste);
-  }, [toast, clearAnalysis]);
+  }, [toast, clearAnalysis, analyzeImage]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (file) {
       setFileName(file.name);
       const reader = new FileReader();
-      reader.onload = () => {
-        setUploadedImage(reader.result as string);
+      reader.onload = async () => {
+        const imageData = reader.result as string;
+        setUploadedImage(imageData);
         clearAnalysis();
         toast({
           title: "Image Uploaded",
-          description: "Screenshot uploaded successfully.",
+          description: "Screenshot uploaded successfully. Starting analysis...",
         });
+        // Automatically start analysis
+        await analyzeImage(imageData);
       };
       reader.readAsDataURL(file);
     }
-  }, [toast, clearAnalysis]);
+  }, [toast, clearAnalysis, analyzeImage]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -215,29 +221,6 @@ export const ScreenshotAnalyzer = () => {
           </div>
         </Card>
 
-        {/* Analysis Button */}
-        {uploadedImage && !analysisResult && (
-          <div className="text-center">
-            <Button
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
-              size="lg"
-              className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
-            >
-              {isAnalyzing ? (
-                <>
-                  <Sparkles className="w-5 h-5 mr-2 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Eye className="w-5 h-5 mr-2" />
-                  Analyze Screenshot
-                </>
-              )}
-            </Button>
-          </div>
-        )}
 
         {/* Progress Bar */}
         {isAnalyzing && (
