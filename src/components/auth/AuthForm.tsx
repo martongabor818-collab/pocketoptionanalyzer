@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,14 +8,23 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mail, Lock } from 'lucide-react';
 import { PasswordStrengthValidator } from './PasswordStrengthValidator';
+import { useNavigate } from 'react-router-dom';
 
 export const AuthForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isPasswordValid, setIsPasswordValid] = useState(false);
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (mode: 'signin' | 'signup') => {
     if (!email || !password) {
@@ -56,6 +65,11 @@ export const AuthForm = () => {
             ? "Please check your email for verification" 
             : "You've been signed in successfully",
         });
+        
+        // Redirect to home page after successful authentication
+        if (mode === 'signin') {
+          navigate('/');
+        }
       }
     } catch (error) {
       toast({
