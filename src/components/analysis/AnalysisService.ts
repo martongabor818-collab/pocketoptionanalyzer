@@ -66,6 +66,9 @@ export class AnalysisService {
     const timeframe = analysis.details?.timeframe || this.extractValue(content, 'TIMEFRAME');
     const reasoning = analysis.details?.reasoning || this.extractValue(content, 'REASONING');
 
+    console.log('Analysis details:', analysis.details);
+    console.log('Extracted reasoning:', reasoning);
+
     // Create detailed analysis points
     const details = this.extractAnalysisDetails(content);
 
