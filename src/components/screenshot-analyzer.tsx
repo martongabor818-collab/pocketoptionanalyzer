@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Upload, Image, Sparkles, Eye, Download, Trash2, X, TrendingUp, TrendingDown, BarChart3, CheckCircle, XCircle } from 'lucide-react';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner';
 
 interface AnalysisResult {
   type: string;
@@ -313,6 +314,9 @@ Mindig rövid, 3 részes választ adj:
           </p>
         </div>
 
+        {/* Subscription Banner */}
+        <SubscriptionBanner />
+
         {/* Statistics */}
         <Card className="p-6 bg-gradient-secondary">
           <div className="flex items-center justify-between mb-4">
@@ -358,13 +362,13 @@ Mindig rövid, 3 részes választ adj:
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">
-                    {isDragActive ? 'Engedd el a fájlt itt' : 'Screenshot feltöltés'}
+                    {isDragActive ? 'Drop the file here' : 'Upload Screenshot'}
                   </h3>
                   <p className="text-muted-foreground">
-                    Húzd ide a fájlt, kattints a tallózáshoz vagy használd a <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">Ctrl+V</kbd> billentyűkombinációt
+                    Drag & drop your M5 chart here, click to browse, or use <kbd className="px-2 py-1 bg-muted rounded text-xs font-mono">Ctrl+V</kbd> to paste
                   </p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    PNG, JPG, JPEG, GIF, BMP, WebP formátumok támogatva
+                    Supports PNG, JPG, JPEG, GIF, BMP, WebP formats
                   </p>
                 </div>
               </>
@@ -372,7 +376,7 @@ Mindig rövid, 3 részes választ adj:
               <div className="space-y-4">
                 <img
                   src={uploadedImage}
-                  alt="Feltöltött screenshot"
+                  alt="Uploaded screenshot"
                   className="max-w-full max-h-96 mx-auto rounded-lg shadow-card"
                 />
                 <div className="flex items-center justify-center gap-4">
@@ -401,7 +405,7 @@ Mindig rövid, 3 részes választ adj:
           <Card className="p-6 bg-muted/50">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">OpenAI API Kulcs</h3>
+                <h3 className="text-lg font-semibold">OpenAI API Key</h3>
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -411,7 +415,7 @@ Mindig rövid, 3 részes választ adj:
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                A valódi AI elemzéshez szükséges az OpenAI API kulcs. Ez biztonságosan tárolódik a böngésződben.
+                An OpenAI API key is required for real AI analysis. It's stored securely in your browser.
               </p>
               <div className="flex gap-2">
                 <input
@@ -427,14 +431,14 @@ Mindig rövid, 3 részes választ adj:
                       localStorage.setItem('openai-api-key', apiKey);
                       setShowApiKeyInput(false);
                       toast({
-                        title: "API kulcs mentve",
-                        description: "Most már elemezhetsz screenshotokat!",
+                        title: "API key saved",
+                        description: "You can now analyze screenshots!",
                       });
                     }
                   }}
                   disabled={!apiKey}
                 >
-                  Mentés
+                  Save
                 </Button>
               </div>
             </div>
@@ -453,12 +457,12 @@ Mindig rövid, 3 részes választ adj:
               {isAnalyzing ? (
                 <>
                   <Sparkles className="w-5 h-5 mr-2 animate-spin" />
-                  Elemzés folyamatban...
+                  Analyzing...
                 </>
               ) : (
                 <>
                   <Eye className="w-5 h-5 mr-2" />
-                  Screenshot Elemzése
+                  Analyze Screenshot
                 </>
               )}
             </Button>
@@ -470,12 +474,12 @@ Mindig rövid, 3 részes választ adj:
           <Card className="p-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">AI elemzés folyamatban</span>
+                <span className="text-sm font-medium">AI analysis in progress</span>
                 <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
               </div>
               <Progress value={progress} className="h-2" />
               <p className="text-sm text-muted-foreground text-center">
-                A mesterséges intelligencia feldolgozza a képet és azonosítja a tartalmát...
+                AI is processing the chart and analyzing market patterns...
               </p>
             </div>
           </Card>
@@ -488,10 +492,10 @@ Mindig rövid, 3 részes választ adj:
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-bold flex items-center gap-2">
                   <Sparkles className="w-6 h-6 text-primary" />
-                  Elemzési Eredmény
+                  Trading Signal
                 </h3>
                 <Badge className="bg-success/20 text-success-foreground border-success/40">
-                  {analysisResult.confidence}% biztos
+                  {analysisResult.confidence}% confidence
                 </Badge>
               </div>
 
