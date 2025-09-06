@@ -29,6 +29,7 @@ export class AnalysisService {
       throw new Error('Invalid response from analysis service');
     }
 
+    console.log('Raw analysis data received:', data.analysis);
     return this.parseAnalysisResponse(data.analysis);
   }
 
@@ -79,6 +80,19 @@ export class AnalysisService {
     if (confidenceMatch) {
       confidence = parseInt(confidenceMatch[1]) || 75;
     }
+
+    console.log('Final parsed result:', {
+      type,
+      content: this.getMainContent(content),
+      confidence,
+      details,
+      entryPoint,
+      targetPrice,
+      stopLoss,
+      riskLevel,
+      timeframe,
+      reasoning
+    });
 
     return {
       type,
