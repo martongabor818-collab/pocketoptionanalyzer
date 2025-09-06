@@ -35,7 +35,7 @@ export const useTradingStats = () => {
         .from('user_trading_stats')
         .select('total_trades, wins, losses, win_rate')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       console.log('useTradingStats: Database response:', { data, error });
 
