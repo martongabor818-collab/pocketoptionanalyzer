@@ -81,43 +81,47 @@ serve(async (req) => {
       });
     }
 
-    const detailedPrompt = `Analyze this trading chart image and provide detailed technical analysis. Look at the price action, candlesticks, moving averages, and any other technical indicators visible.
+    const detailedPrompt = `You are a professional trading chart analyst. Analyze this trading chart image and provide specific technical analysis.
 
-Respond in this exact format:
+IMPORTANT: Look carefully at the price levels, candlestick patterns, moving averages, support/resistance levels, and any visible indicators in the chart.
+
+Respond in this EXACT format:
 
 ### SIGNAL TYPE
-BUY or SELL or NEUTRAL (choose one based on technical patterns)
+[Write either "BUY", "SELL", or "NEUTRAL" based on technical analysis]
 
 ### CONFIDENCE
-[Number between 50-95]%
+[Write a number between 60-95]%
 
 ### ANALYSIS
-- **Support Levels:** [Specific price levels where price might bounce up]
-- **Resistance Levels:** [Specific price levels where price might bounce down]  
-- **Trend Direction:** [Current trend - bullish, bearish, or sideways]
-- **Moving Averages:** [Position and crossovers of moving average lines]
-- **Chart Pattern:** [Any patterns like triangles, channels, breakouts]
-- **Volume:** [Volume analysis if visible]
+- **Current Price:** [State the current price level you can see]
+- **Support Level:** [Identify the nearest support price level]  
+- **Resistance Level:** [Identify the nearest resistance price level]
+- **Trend Direction:** [Bullish/Bearish/Sideways with explanation]
+- **Moving Averages:** [Describe MA positions and any crossovers]
+- **Chart Pattern:** [Identify patterns like breakout, triangle, channel, etc.]
+- **Momentum:** [Describe price momentum and volume if visible]
+- **Key Observation:** [Most important technical factor for the signal]
 
-### ENTRY POINT  
-[Specific price level for entry]
+### ENTRY POINT
+[Give specific price level for entry, like "174.50" or "Current market price"]
 
 ### TARGET PRICE
-[Specific price target based on technical levels]
+[Give specific target price level, like "175.20"]
 
-### STOP LOSS
-[Specific stop loss price level]
+### STOP LOSS  
+[Give specific stop loss price level, like "174.00"]
 
 ### RISK ASSESSMENT
-LOW/MEDIUM/HIGH - [Brief explanation]
+[Write "LOW", "MEDIUM", or "HIGH"] - [Brief explanation why]
 
 ### TIMEFRAME
-[Expected duration: minutes/hours/days]
+[Write timeframe like "5-15 minutes", "1-2 hours", "few hours", etc.]
 
 ### REASONING
-[Technical explanation for the signal recommendation]
+[2-3 sentences explaining the main technical reasons for this signal based on what you observe in the chart]
 
-Provide specific price levels and clear technical observations. Focus on what you can actually see in the chart.`;
+CRITICAL: Base your analysis on what you can actually see in the chart image. Provide specific price levels, not generic advice.`;
 
     console.log('Making OpenAI API request for user:', user.id);
 

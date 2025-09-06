@@ -4,38 +4,22 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Upload, Image, Sparkles, Eye, Download, Trash2, X, TrendingUp, TrendingDown, BarChart3, CheckCircle, XCircle } from 'lucide-react';
+import { Upload, Image, Sparkles, Eye, BarChart3, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SubscriptionBanner } from '@/components/subscription/SubscriptionBanner';
-import { supabase } from '@/integrations/supabase/client';
+import { AnalysisResult } from '@/components/analysis/AnalysisResult';
+import { useImageAnalysis } from '@/hooks/useImageAnalysis';
 import { useAuth } from '@/hooks/useAuth';
 import { useTradingStats } from '@/hooks/useTradingStats';
-
-interface AnalysisResult {
-  type: string;
-  content: string;
-  confidence: number;
-  details: string[];
-}
-
-interface OpenAIResponse {
-  choices: {
-    message: {
-      content: string;
-    };
-  }[];
-}
 
 export const ScreenshotAnalyzer = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [currentTradeResult, setCurrentTradeResult] = useState<'win' | 'loss' | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
-  const { stats: tradeStats, loading: statsLoading, updateStats } = useTradingStats();
+  const { stats: tradeStats, updateStats } = useTradingStats();
+  const { isAnalyzing, progress, analysisResult, analyzeImage, clearAnalysis } = useImageAnalysis();
 
   // Handle paste from clipboard
   React.useEffect(() => {
@@ -52,11 +36,11 @@ export const ScreenshotAnalyzer = () => {
             const reader = new FileReader();
             reader.onload = () => {
               setUploadedImage(reader.result as string);
-              setFileName(`Beillesztett kép - ${new Date().toLocaleTimeString()}`);
-              setAnalysisResult(null);
+              setFileName(`Pasted Image - ${new Date().toLocaleTimeString()}`);
+              clearAnalysis();
               toast({
-                title: "Kép beillesztve",
-                description: "A screenshot sikeresen beillesztésre került a vágólapról (Ctrl+V).",
+                title: "Image Pasted",
+                description: "Screenshot pasted from clipboard (Ctrl+V).",
               });
             };
             reader.readAsDataURL(file);
@@ -68,7 +52,7 @@ export const ScreenshotAnalyzer = () => {
 
     document.addEventListener('paste', handlePaste);
     return () => document.removeEventListener('paste', handlePaste);
-  }, [toast]);
+  }, [toast, clearAnalysis]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -77,15 +61,15 @@ export const ScreenshotAnalyzer = () => {
       const reader = new FileReader();
       reader.onload = () => {
         setUploadedImage(reader.result as string);
-        setAnalysisResult(null);
+        clearAnalysis();
         toast({
-          title: "Kép feltöltve",
-          description: "A screenshot sikeresen feltöltésre került.",
+          title: "Image Uploaded",
+          description: "Screenshot uploaded successfully.",
         });
       };
       reader.readAsDataURL(file);
     }
-  }, [toast]);
+  }, [toast, clearAnalysis]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -95,134 +79,9 @@ export const ScreenshotAnalyzer = () => {
     multiple: false
   });
 
-  const analyzeScreenshot = async () => {
-    console.log('analyzeScreenshot: Function called');
-    console.log('analyzeScreenshot: User:', user);
-    console.log('analyzeScreenshot: UploadedImage:', !!uploadedImage);
-    
-    if (!user) {
-      console.log('analyzeScreenshot: No user found');
-      toast({
-        title: "Bejelentkezés szükséges",
-        description: "Kérlek jelentkezz be a képelemzéshez.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!uploadedImage) {
-      console.log('analyzeScreenshot: No uploaded image');
-      toast({
-        title: "Nincs kép",
-        description: "Kérlek tölts fel egy képet először.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    console.log('analyzeScreenshot: Starting analysis...');
-
-    setIsAnalyzing(true);
-    setProgress(0);
-    setCurrentTradeResult(null);
-    
-    console.log('analyzeScreenshot: Setting up progress interval');
-    const progressInterval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(progressInterval);
-          return 90;
-        }
-        return prev + Math.random() * 15;
-      });
-    }, 300);
-
-    try {
-      console.log('analyzeScreenshot: Calling supabase function with image data length:', uploadedImage.length);
-      const { data, error } = await supabase.functions.invoke('analyze-screenshot', {
-        body: { imageData: uploadedImage }
-      });
-
-      console.log('analyzeScreenshot: Supabase response:', { data, error });
-
-      clearInterval(progressInterval);
-      setProgress(100);
-
-      if (error) {
-        console.error('analyzeScreenshot: Error response:', error);
-        throw new Error(error.message || 'Failed to analyze screenshot');
-      }
-
-      console.log('analyzeScreenshot: Full data object:', data);
-      console.log('analyzeScreenshot: Data keys:', Object.keys(data || {}));
-      console.log('analyzeScreenshot: Data type:', typeof data);
-      
-      if (!data?.analysis) {
-        console.error('analyzeScreenshot: No analysis in data:', data);
-        console.error('analyzeScreenshot: Available data properties:', Object.keys(data || {}));
-        throw new Error('Invalid response from analysis service');
-      }
-
-      console.log('analyzeScreenshot: Analysis content:', data.analysis);
-
-      // Parse the AI response into structured format
-      const analysis = data.analysis.content;
-      console.log('analyzeScreenshot: Analysis content string:', analysis);
-      
-      const lines = analysis.split('\n').filter(line => line.trim());
-      console.log('analyzeScreenshot: Parsed lines:', lines);
-      
-      const type = lines.find(line => line.includes('BUY') || line.includes('SELL') || line.includes('CALL') || line.includes('PUT'))?.replace(/^\d+\.?\s*/, '') || 'Általános tartalom';
-      const content = lines.slice(0, 3).join(' ');
-      const details = lines.slice(1).filter(line => line.trim() && !line.includes('Válasz')).map(line => line.replace(/^\d+\.?\s*/, '').trim());
-
-      console.log('analyzeScreenshot: Parsed type:', type);
-      console.log('analyzeScreenshot: Parsed content:', content);
-      console.log('analyzeScreenshot: Parsed details:', details);
-
-      const resultData = {
-        type: type.replace(/[^:]*:\s*/, ''),
-        content: content,
-        confidence: data.analysis.confidence || 95,
-        details: details.slice(0, 6)
-      };
-
-      console.log('analyzeScreenshot: Setting analysis result:', resultData);
-      setAnalysisResult(resultData);
-
-      // Analysis count is now tracked automatically in the database
-
-      toast({
-        title: "Elemzés befejezve",
-        description: "A screenshot AI elemzése sikeresen befejeződött.",
-      });
-
-      console.log('analyzeScreenshot: Analysis completed successfully');
-
-    } catch (error) {
-      clearInterval(progressInterval);
-      setProgress(0);
-      console.error('API hiba:', error);
-      
-      let errorMessage = 'Az API hívás sikertelen.';
-      if (error instanceof Error) {
-        if (error.message.includes('Unauthorized')) {
-          errorMessage = 'Hitelesítési hiba. Kérlek jelentkezz be újra.';
-        } else if (error.message.includes('Invalid image')) {
-          errorMessage = 'Érvénytelen képformátum vagy méret. Használj JPEG, PNG, GIF vagy WebP formátumot, maximum 10MB méretben.';
-        } else if (error.message.includes('rate limit')) {
-          errorMessage = 'Túl sok kérés. Kérlek próbáld újra később.';
-        }
-      }
-      
-      toast({
-        title: "Hiba történt",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    } finally {
-      setIsAnalyzing(false);
-    }
+  const handleAnalyze = async () => {
+    if (!uploadedImage) return;
+    await analyzeImage(uploadedImage);
   };
 
   const markTradeResult = async (result: 'win' | 'loss') => {
@@ -234,8 +93,8 @@ export const ScreenshotAnalyzer = () => {
     await updateStats(result === 'win');
 
     toast({
-      title: result === 'win' ? "Nyerő trade!" : "Vesztes trade",
-      description: `Statisztika frissítve. Nyerési arány: ${tradeStats.win_rate.toFixed(1)}%`,
+      title: result === 'win' ? "Winning Trade!" : "Losing Trade",
+      description: `Statistics updated. Win rate: ${tradeStats.win_rate.toFixed(1)}%`,
       variant: result === 'win' ? "default" : "destructive"
     });
 
@@ -248,8 +107,7 @@ export const ScreenshotAnalyzer = () => {
   const clearImage = () => {
     setUploadedImage(null);
     setFileName('');
-    setAnalysisResult(null);
-    setProgress(0);
+    clearAnalysis();
     setCurrentTradeResult(null);
   };
 
@@ -357,12 +215,11 @@ export const ScreenshotAnalyzer = () => {
           </div>
         </Card>
 
-
         {/* Analysis Button */}
         {uploadedImage && !analysisResult && (
           <div className="text-center">
             <Button
-              onClick={analyzeScreenshot}
+              onClick={handleAnalyze}
               disabled={isAnalyzing}
               size="lg"
               className="bg-gradient-primary hover:shadow-glow transition-all duration-300"
@@ -400,98 +257,13 @@ export const ScreenshotAnalyzer = () => {
 
         {/* Analysis Results */}
         {analysisResult && !isAnalyzing && (
-          <Card className="p-6 bg-gradient-secondary border-primary/20 shadow-card">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-bold flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-primary" />
-                  Trading Signal
-                </h3>
-                <Badge className="bg-success/20 text-success-foreground border-success/40">
-                  {analysisResult.confidence}% confidence
-                </Badge>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-lg font-semibold text-primary mb-2">
-                    Felismert típus: {analysisResult.type}
-                  </h4>
-                  <p className="text-foreground/90 leading-relaxed">
-                    {analysisResult.content}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-lg font-semibold mb-3">Részletes elemzés:</h4>
-                  <div className="grid gap-2">
-                    {analysisResult.details.map((detail, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-card/50 border border-border/50"
-                      >
-                        <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                        <span className="text-foreground/80">{detail}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-border/50">
-                  <div className="flex gap-3 mb-4">
-                    <Button
-                      onClick={() => analyzeScreenshot()}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Újra elemez
-                    </Button>
-                    <Button
-                      onClick={clearImage}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Új kép
-                    </Button>
-                  </div>
-                  
-                  {/* Trade Result Buttons */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-center text-muted-foreground">
-                      Trade eredmény:
-                    </h4>
-                    <div className="flex gap-3">
-                      <Button
-                        onClick={() => markTradeResult('win')}
-                        disabled={currentTradeResult !== null}
-                        variant={currentTradeResult === 'win' ? "default" : "outline"}
-                        className={`flex-1 ${currentTradeResult === 'win' ? 'bg-green-500 hover:bg-green-600' : 'hover:bg-green-500/10 hover:text-green-500'}`}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Nyert
-                      </Button>
-                      <Button
-                        onClick={() => markTradeResult('loss')}
-                        disabled={currentTradeResult !== null}
-                        variant={currentTradeResult === 'loss' ? "default" : "outline"}
-                        className={`flex-1 ${currentTradeResult === 'loss' ? 'bg-red-500 hover:bg-red-600' : 'hover:bg-red-500/10 hover:text-red-500'}`}
-                      >
-                        <XCircle className="w-4 h-4 mr-2" />
-                        Veszett
-                      </Button>
-                    </div>
-                    {currentTradeResult && (
-                      <p className="text-sm text-center text-muted-foreground">
-                        Trade eredmény rögzítve: {currentTradeResult === 'win' ? '✅ Nyert' : '❌ Veszett'}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card>
+          <AnalysisResult
+            result={analysisResult}
+            currentTradeResult={currentTradeResult}
+            onReanalyze={handleAnalyze}
+            onClear={clearImage}
+            onMarkTradeResult={markTradeResult}
+          />
         )}
       </div>
     </div>
