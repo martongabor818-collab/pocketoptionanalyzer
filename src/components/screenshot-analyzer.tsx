@@ -96,7 +96,12 @@ export const ScreenshotAnalyzer = () => {
   });
 
   const analyzeScreenshot = async () => {
+    console.log('analyzeScreenshot: Function called');
+    console.log('analyzeScreenshot: User:', user);
+    console.log('analyzeScreenshot: UploadedImage:', !!uploadedImage);
+    
     if (!user) {
+      console.log('analyzeScreenshot: No user found');
       toast({
         title: "Bejelentkezés szükséges",
         description: "Kérlek jelentkezz be a képelemzéshez.",
@@ -106,6 +111,7 @@ export const ScreenshotAnalyzer = () => {
     }
 
     if (!uploadedImage) {
+      console.log('analyzeScreenshot: No uploaded image');
       toast({
         title: "Nincs kép",
         description: "Kérlek tölts fel egy képet először.",
@@ -114,10 +120,13 @@ export const ScreenshotAnalyzer = () => {
       return;
     }
 
+    console.log('analyzeScreenshot: Starting analysis...');
+
     setIsAnalyzing(true);
     setProgress(0);
     setCurrentTradeResult(null);
     
+    console.log('analyzeScreenshot: Setting up progress interval');
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 90) {
@@ -129,9 +138,12 @@ export const ScreenshotAnalyzer = () => {
     }, 300);
 
     try {
+      console.log('analyzeScreenshot: Calling supabase function with image data length:', uploadedImage.length);
       const { data, error } = await supabase.functions.invoke('analyze-screenshot', {
         body: { imageData: uploadedImage }
       });
+
+      console.log('analyzeScreenshot: Supabase response:', { data, error });
 
       clearInterval(progressInterval);
       setProgress(100);
