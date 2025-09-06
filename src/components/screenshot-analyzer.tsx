@@ -149,27 +149,43 @@ export const ScreenshotAnalyzer = () => {
       setProgress(100);
 
       if (error) {
-        console.error('Analysis error:', error);
+        console.error('analyzeScreenshot: Error response:', error);
         throw new Error(error.message || 'Failed to analyze screenshot');
       }
 
+      console.log('analyzeScreenshot: Full data object:', data);
+      
       if (!data?.analysis) {
+        console.error('analyzeScreenshot: No analysis in data:', data);
         throw new Error('Invalid response from analysis service');
       }
 
+      console.log('analyzeScreenshot: Analysis content:', data.analysis);
+
       // Parse the AI response into structured format
       const analysis = data.analysis.content;
+      console.log('analyzeScreenshot: Analysis content string:', analysis);
+      
       const lines = analysis.split('\n').filter(line => line.trim());
+      console.log('analyzeScreenshot: Parsed lines:', lines);
+      
       const type = lines.find(line => line.includes('BUY') || line.includes('SELL') || line.includes('CALL') || line.includes('PUT'))?.replace(/^\d+\.?\s*/, '') || 'Általános tartalom';
       const content = lines.slice(0, 3).join(' ');
       const details = lines.slice(1).filter(line => line.trim() && !line.includes('Válasz')).map(line => line.replace(/^\d+\.?\s*/, '').trim());
 
-      setAnalysisResult({
+      console.log('analyzeScreenshot: Parsed type:', type);
+      console.log('analyzeScreenshot: Parsed content:', content);
+      console.log('analyzeScreenshot: Parsed details:', details);
+
+      const resultData = {
         type: type.replace(/[^:]*:\s*/, ''),
         content: content,
         confidence: data.analysis.confidence || 95,
         details: details.slice(0, 6)
-      });
+      };
+
+      console.log('analyzeScreenshot: Setting analysis result:', resultData);
+      setAnalysisResult(resultData);
 
       // Analysis count is now tracked automatically in the database
 
@@ -177,6 +193,8 @@ export const ScreenshotAnalyzer = () => {
         title: "Elemzés befejezve",
         description: "A screenshot AI elemzése sikeresen befejeződött.",
       });
+
+      console.log('analyzeScreenshot: Analysis completed successfully');
 
     } catch (error) {
       clearInterval(progressInterval);
