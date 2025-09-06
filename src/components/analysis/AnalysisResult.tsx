@@ -59,7 +59,7 @@ export const AnalysisResult: React.FC<AnalysisResultProps> = ({
             {/* Short Reasoning - Prominently displayed */}
             {result.reasoning && (
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 mb-4">
-                <h4 className="text-sm font-semibold text-primary mb-2">📋 Rövid indoklás:</h4>
+                <h4 className="text-sm font-semibold text-primary mb-2">📋 Short Explanation:</h4>
                 <p className="text-foreground font-medium leading-relaxed">
                   {result.reasoning.length > 150 ? result.reasoning.substring(0, 150) + '...' : result.reasoning}
                 </p>
