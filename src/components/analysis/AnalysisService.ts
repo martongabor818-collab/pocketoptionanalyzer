@@ -121,12 +121,12 @@ export class AnalysisService {
       new RegExp(`###\\s*${field}[:\\s]*([^#\n]+)`, 'i'),
       new RegExp(`${field}[:\\s]*([^\n]+)`, 'i'),
       new RegExp(`\\*\\*${field}\\*\\*[:\\s]*([^\n]+)`, 'i'),
-      // Hungarian patterns
-      new RegExp(`###\\s*JELTÍPUS[:\\s]*([^#\n]+)`, 'i'),
-      new RegExp(`###\\s*MEGBÍZHATÓSÁG[:\\s]*([^#\n]+)`, 'i'),
-      new RegExp(`###\\s*ELEMZÉS[:\\s]*([^#\n]+)`, 'i'),
-      new RegExp(`###\\s*BELÉPÉSI\\s*PONT[:\\s]*([^#\n]+)`, 'i'),
-      new RegExp(`###\\s*CÉL\\s*ÁR[:\\s]*([^#\n]+)`, 'i'),
+      // Additional English patterns
+      new RegExp(`###\\s*SIGNAL\\s*TYPE[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*CONFIDENCE[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*ANALYSIS[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*ENTRY\\s*POINT[:\\s]*([^#\n]+)`, 'i'),
+      new RegExp(`###\\s*TARGET\\s*PRICE[:\\s]*([^#\n]+)`, 'i'),
       new RegExp(`###\\s*STOP\\s*LOSS[:\\s]*([^#\n]+)`, 'i'),
       new RegExp(`###\\s*KOCKÁZAT[:\\s]*([^#\n]+)`, 'i'),
       new RegExp(`###\\s*IDŐKERET[:\\s]*([^#\n]+)`, 'i'),
