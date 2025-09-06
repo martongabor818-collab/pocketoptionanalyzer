@@ -163,7 +163,7 @@ IMPORTANT: Always give BUY or SELL recommendation. Never say "ANALYSIS" or give 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-2025-08-07',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'user',
@@ -184,6 +184,9 @@ IMPORTANT: Always give BUY or SELL recommendation. Never say "ANALYSIS" or give 
         max_completion_tokens: 1500,
       }),
     });
+
+    console.log('OpenAI API response status:', response.status);
+    console.log('OpenAI API response headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorData = await response.text();
