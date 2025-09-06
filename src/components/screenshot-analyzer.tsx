@@ -302,14 +302,14 @@ Mindig rövid, 3 részes választ adj:
         <div className="text-center space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-primary rounded-full text-sm font-medium">
             <Sparkles className="w-4 h-4" />
-            AI-alapú Screenshot Elemző
+            AI-Powered Trading Signals
           </div>
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            PocketSeptember Clone
+            PocketOption Trading AI
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Töltsd fel bármilyen screenshotot és az AI részletesen elemzi a tartalmát, 
-            felismeri az elemeket és hasznos információkat ad róla.
+            Upload your M5 chart screenshot and get instant BUY/SELL signals with AI-powered analysis, 
+            timing recommendations, and confidence levels.
           </p>
         </div>
 
@@ -318,25 +318,25 @@ Mindig rövid, 3 részes választ adj:
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
-              Kereskedési Statisztikák
+              Trading Statistics
             </h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="text-center p-3 rounded-lg bg-card/50">
               <div className="text-2xl font-bold text-primary">{tradeStats.totalAnalyses}</div>
-              <div className="text-sm text-muted-foreground">Elemzések</div>
+              <div className="text-sm text-muted-foreground">Analyses</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-card/50">
               <div className="text-2xl font-bold text-green-500">{tradeStats.wins}</div>
-              <div className="text-sm text-muted-foreground">Nyerő</div>
+              <div className="text-sm text-muted-foreground">Wins</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-card/50">
               <div className="text-2xl font-bold text-red-500">{tradeStats.losses}</div>
-              <div className="text-sm text-muted-foreground">Vesztes</div>
+              <div className="text-sm text-muted-foreground">Losses</div>
             </div>
             <div className="text-center p-3 rounded-lg bg-card/50">
               <div className="text-2xl font-bold text-primary">{tradeStats.winRate.toFixed(1)}%</div>
-              <div className="text-sm text-muted-foreground">Nyerési arány</div>
+              <div className="text-sm text-muted-foreground">Win Rate</div>
             </div>
           </div>
         </Card>
