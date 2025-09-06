@@ -205,6 +205,7 @@ FONTOS: Mindig BUY vagy SELL ajánlást adj. Soha ne mondj "ELEMZÉS"-t vagy ál
     }
 
     const analysisText = data.choices[0].message.content;
+    console.log('OpenAI raw response:', analysisText);
 
     // Parse the analysis into structured format
     const analysis = {
@@ -222,6 +223,7 @@ FONTOS: Mindig BUY vagy SELL ajánlást adj. Soha ne mondj "ELEMZÉS"-t vagy ál
       }
     };
 
+    console.log('Parsed analysis:', analysis);
     console.log('Successfully analyzed screenshot for user:', user.id);
 
     return new Response(JSON.stringify({ analysis }), {
@@ -238,7 +240,22 @@ FONTOS: Mindig BUY vagy SELL ajánlást adj. Soha ne mondj "ELEMZÉS"-t vagy ál
 });
 
 function extractField(text: string, fieldName: string): string {
-  const regex = new RegExp(`${fieldName}:?\\s*([^\\n]+)`, 'i');
-  const match = text.match(regex);
-  return match ? match[1].trim() : '';
+  // Try multiple patterns to extract field values
+  const patterns = [
+    new RegExp(`###\\s*${fieldName}[:\\s]*([^#\\n]+)`, 'i'),
+    new RegExp(`${fieldName}[:\\s]*([^\\n]+)`, 'i'),
+    new RegExp(`\\*\\*${fieldName}\\*\\*[:\\s]*([^\\n]+)`, 'i')
+  ];
+
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const result = match[1].trim().replace(/^\*+|\*+$/g, '').trim();
+      console.log(`Extracted ${fieldName}:`, result);
+      return result;
+    }
+  }
+  
+  console.log(`No match found for ${fieldName}`);
+  return '';
 }
