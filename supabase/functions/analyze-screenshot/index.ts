@@ -81,41 +81,43 @@ serve(async (req) => {
       });
     }
 
-    const detailedPrompt = `You are a technical chart analyst. Analyze this financial chart screenshot and provide technical analysis in the following format:
+    const detailedPrompt = `Analyze this trading chart image and provide detailed technical analysis. Look at the price action, candlesticks, moving averages, and any other technical indicators visible.
+
+Respond in this exact format:
 
 ### SIGNAL TYPE
-- Determine the technical pattern: BUY signal, SELL signal, or NEUTRAL/CONSOLIDATION
+BUY or SELL or NEUTRAL (choose one based on technical patterns)
 
-### CONFIDENCE  
-- Rate confidence in the technical pattern from 1-100%
+### CONFIDENCE
+[Number between 50-95]%
 
 ### ANALYSIS
-- **Support and Resistance Levels:** Identify key price levels
-- **Trend Analysis:** Describe short-term and long-term price direction
-- **Chart Patterns:** Identify any technical patterns (triangles, head & shoulders, etc.)
-- **Moving Averages:** Analyze moving average positions and crossovers
-- **Volume Analysis:** Comment on volume patterns if visible
-- **Technical Indicators:** Analyze any visible indicators (RSI, MACD, etc.)
+- **Support Levels:** [Specific price levels where price might bounce up]
+- **Resistance Levels:** [Specific price levels where price might bounce down]  
+- **Trend Direction:** [Current trend - bullish, bearish, or sideways]
+- **Moving Averages:** [Position and crossovers of moving average lines]
+- **Chart Pattern:** [Any patterns like triangles, channels, breakouts]
+- **Volume:** [Volume analysis if visible]
 
-### ENTRY POINT
-- Suggest optimal entry price based on technical levels
+### ENTRY POINT  
+[Specific price level for entry]
 
-### TARGET PRICE  
-- Identify potential price targets based on support/resistance
+### TARGET PRICE
+[Specific price target based on technical levels]
 
 ### STOP LOSS
-- Recommend stop loss level for risk management
+[Specific stop loss price level]
 
 ### RISK ASSESSMENT
-- Classify as LOW, MEDIUM, or HIGH risk with explanation
+LOW/MEDIUM/HIGH - [Brief explanation]
 
 ### TIMEFRAME
-- Estimate duration for the technical setup
+[Expected duration: minutes/hours/days]
 
 ### REASONING
-- Explain the technical basis for your analysis
+[Technical explanation for the signal recommendation]
 
-Focus purely on technical chart analysis. Provide specific price levels and concrete technical observations.`;
+Provide specific price levels and clear technical observations. Focus on what you can actually see in the chart.`;
 
     console.log('Making OpenAI API request for user:', user.id);
 
@@ -126,7 +128,7 @@ Focus purely on technical chart analysis. Provide specific price levels and conc
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5-2025-08-07',
         messages: [
           {
             role: 'user',
@@ -144,8 +146,7 @@ Focus purely on technical chart analysis. Provide specific price levels and conc
             ]
           }
         ],
-        max_tokens: 1500,
-        temperature: 0.7,
+        max_completion_tokens: 1500,
       }),
     });
 
