@@ -81,32 +81,41 @@ serve(async (req) => {
       });
     }
 
-    const detailedPrompt = `You are an expert trading analyst. Analyze this chart screenshot and provide a comprehensive trading signal with the following structured information:
+    const detailedPrompt = `You are a technical chart analyst. Analyze this financial chart screenshot and provide technical analysis in the following format:
 
-SIGNAL TYPE: Determine if this is a BUY, SELL, or HOLD signal based on your analysis.
+### SIGNAL TYPE
+- Determine the technical pattern: BUY signal, SELL signal, or NEUTRAL/CONSOLIDATION
 
-CONFIDENCE: Rate your confidence in this signal from 1-100%.
+### CONFIDENCE  
+- Rate confidence in the technical pattern from 1-100%
 
-ANALYSIS: Provide detailed technical analysis including:
-- Key support and resistance levels
-- Trend analysis (short-term and long-term)
-- Volume analysis if visible
-- Important chart patterns
-- Relevant technical indicators visible in the chart
+### ANALYSIS
+- **Support and Resistance Levels:** Identify key price levels
+- **Trend Analysis:** Describe short-term and long-term price direction
+- **Chart Patterns:** Identify any technical patterns (triangles, head & shoulders, etc.)
+- **Moving Averages:** Analyze moving average positions and crossovers
+- **Volume Analysis:** Comment on volume patterns if visible
+- **Technical Indicators:** Analyze any visible indicators (RSI, MACD, etc.)
 
-ENTRY POINT: Specify the recommended entry price level.
+### ENTRY POINT
+- Suggest optimal entry price based on technical levels
 
-TARGET PRICE: Suggest a realistic profit target based on technical levels.
+### TARGET PRICE  
+- Identify potential price targets based on support/resistance
 
-STOP LOSS: Recommend a stop loss level to manage risk.
+### STOP LOSS
+- Recommend stop loss level for risk management
 
-RISK ASSESSMENT: Evaluate the risk level (LOW, MEDIUM, HIGH) and explain why.
+### RISK ASSESSMENT
+- Classify as LOW, MEDIUM, or HIGH risk with explanation
 
-TIMEFRAME: Estimate the expected timeframe for this trade (minutes, hours, days, weeks).
+### TIMEFRAME
+- Estimate duration for the technical setup
 
-REASONING: Explain your overall reasoning for this recommendation, including any potential risks or considerations.
+### REASONING
+- Explain the technical basis for your analysis
 
-Please provide a professional, actionable trading recommendation based on what you can observe in this chart.`;
+Focus purely on technical chart analysis. Provide specific price levels and concrete technical observations.`;
 
     console.log('Making OpenAI API request for user:', user.id);
 
