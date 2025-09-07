@@ -1,12 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, User } from 'lucide-react';
+import { useAdminAccess } from '@/hooks/useAdminAccess';
+import { LogOut, User, Settings } from 'lucide-react';
 import { useState } from 'react';
 import { AuthForm } from '@/components/auth/AuthForm';
+import { useNavigate } from 'react-router-dom';
 
 export const Header = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdminAccess();
   const [showAuth, setShowAuth] = useState(false);
+  const navigate = useNavigate();
 
   if (showAuth) {
     return <AuthForm />;
@@ -37,6 +41,16 @@ export const Header = () => {
         <div className="flex items-center space-x-4">
           {user ? (
             <div className="flex items-center space-x-2">
+              {isAdmin && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => navigate('/admin')}
+                >
+                  <Settings className="h-4 w-4 mr-1" />
+                  Admin
+                </Button>
+              )}
               <div className="flex items-center space-x-2 text-sm">
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">{user.email}</span>
