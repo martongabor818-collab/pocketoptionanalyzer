@@ -37,11 +37,12 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
-    // Define price mappings
+    // Define price mappings for new pricing structure
     const priceMap: Record<string, { amount: number; name: string }> = {
-      basic_monthly: { amount: 999, name: "Basic Plan" },
-      pro_monthly: { amount: 2999, name: "Pro Plan" },
-      elite_monthly: { amount: 7999, name: "Elite Plan" }
+      "24_hour_pass": { amount: 700, name: "24-Hour Pass" },
+      "48_hour_pass": { amount: 1200, name: "48-Hour Pass" },
+      "weekly_plan": { amount: 3000, name: "Weekly Plan" },
+      "monthly_plan": { amount: 8500, name: "Monthly Plan" }
     };
 
     const priceInfo = priceMap[priceId];
@@ -55,10 +56,10 @@ serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "eur",
             product_data: { 
               name: priceInfo.name,
-              description: "PocketOption Trading AI Subscription"
+              description: "PocketOption Trading AI - Premium Signals"
             },
             unit_amount: priceInfo.amount,
             recurring: { interval: "month" },
