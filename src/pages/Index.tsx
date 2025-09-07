@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { ScreenshotAnalyzer } from '@/components/screenshot-analyzer';
 import { Header } from '@/components/navigation/Header';
 import { HeroSection } from '@/components/landing/HeroSection';
+import { FeaturesSection } from '@/components/features/FeaturesSection';
 import { PricingSection } from '@/components/pricing/PricingSection';
 
 const Index = () => {
@@ -21,6 +22,7 @@ const Index = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <HeroSection />
+        <FeaturesSection />
         <div id="pricing">
           <PricingSection />
         </div>
