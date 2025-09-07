@@ -7,6 +7,7 @@ import { FeaturesSection } from '@/components/features/FeaturesSection';
 import { PricingSection } from '@/components/pricing/PricingSection';
 
 const Index = () => {
+  console.log('Index component rendered');
   const { user, loading } = useAuth();
 
   if (loading) {
