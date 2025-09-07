@@ -60,7 +60,7 @@ export const Header = () => {
               </Button>
             </div>
           ) : (
-            <Button onClick={() => setShowAuth(true)}>
+            <Button onClick={() => navigate('/auth')}>
               Sign In
             </Button>
           )}
