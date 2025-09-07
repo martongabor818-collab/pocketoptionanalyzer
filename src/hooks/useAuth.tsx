@@ -69,7 +69,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       email,
       password,
     });
-    console.log('SignIn result:', { data: data?.user?.email, error });
+    console.log('SignIn result - data:', data);
+    console.log('SignIn result - error:', error);
+    console.log('SignIn result - user email:', data?.user?.email);
     return { error };
   };
 

@@ -53,7 +53,8 @@ export const AuthForm = () => {
       const { error } = mode === 'signup' 
         ? await signUp(email, password)
         : await signIn(email, password);
-      console.log('Form submission result:', { error });
+      console.log('Form submission result - error:', error);
+      console.log('Form submission result - error message:', error?.message);
 
       if (error) {
         toast({
