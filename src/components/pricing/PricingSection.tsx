@@ -117,7 +117,7 @@ export const PricingSection = () => {
             Simple, Transparent Pricing
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start with our free trial, then choose the plan that fits your trading style
+            Choose the plan that fits your trading style
           </p>
         </div>
 
@@ -172,7 +172,7 @@ export const PricingSection = () => {
 
         <div className="text-center mt-12">
           <p className="text-muted-foreground">
-            All plans include a 7-day free trial. Cancel anytime.
+            All plans include premium trading signals. Cancel anytime.
           </p>
         </div>
       </div>

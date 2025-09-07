@@ -25,9 +25,9 @@ export const SubscriptionBanner = () => {
           <div className="flex items-center space-x-3">
             <Zap className="h-5 w-5 text-primary" />
             <div>
-              <p className="font-medium">Free Trial</p>
+              <p className="font-medium">Premium Features</p>
               <p className="text-sm text-muted-foreground">
-                Upgrade to unlock unlimited AI analyses and advanced features
+                Subscribe to unlock unlimited AI analyses and advanced features
               </p>
             </div>
           </div>
