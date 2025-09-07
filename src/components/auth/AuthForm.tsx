@@ -49,9 +49,11 @@ export const AuthForm = () => {
 
     setLoading(true);
     try {
+      console.log('Submitting form:', mode, email);
       const { error } = mode === 'signup' 
         ? await signUp(email, password)
         : await signIn(email, password);
+      console.log('Form submission result:', { error });
 
       if (error) {
         toast({
