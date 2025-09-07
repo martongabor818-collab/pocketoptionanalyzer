@@ -39,8 +39,7 @@ const pricingTiers: PricingTier[] = [
       "🎯 Total access to premium signals",
       "📊 Complete coverage of all assets",
       "🧠 Advanced AI analysis in real-time",
-      "⚡ Instant push notifications",
-      "🎧 Priority customer support 24/7"
+      "⚡ Instant push notifications"
     ],
     icon: <Zap className="h-6 w-6" />,
     priceId: "48_hour_pass"
@@ -53,10 +52,7 @@ const pricingTiers: PricingTier[] = [
       "🎯 Total access to premium signals",
       "📊 Complete coverage of all assets",
       "🧠 Advanced AI analysis in real-time",
-      "⚡ Instant push notifications",
-      "🎧 Priority customer support 24/7",
-      "📈 In-depth market analysis",
-      "🛡️ Risk management strategies"
+      "⚡ Instant push notifications"
     ],
     popular: true,
     icon: <Zap className="h-6 w-6" />,
@@ -70,11 +66,7 @@ const pricingTiers: PricingTier[] = [
       "🎯 Total access to premium signals",
       "📊 Complete coverage of all assets",
       "🧠 Advanced AI analysis in real-time",
-      "⚡ Instant push notifications",
-      "🎧 Dedicated VIP customer support",
-      "📊 Institutional-grade market analysis",
-      "🔧 Advanced risk management strategies",
-      "👨‍💼 Personal trading advisor"
+      "⚡ Instant push notifications"
     ],
     icon: <Crown className="h-6 w-6" />,
     priceId: "monthly_plan"
@@ -115,62 +107,72 @@ export const PricingSection = () => {
   };
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-br from-background to-secondary/20">
+    <section className="py-20 px-4">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-primary">
-            Unlock premium trading signals and improve your strategy.
+        <div className="text-center mb-16">
+          <Badge variant="secondary" className="mb-4">
+            Choose Your Plan
+          </Badge>
+          <h2 className="text-4xl font-bold mb-4">
+            Simple, Transparent Pricing
           </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Start with our free trial, then choose the plan that fits your trading style
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
           {pricingTiers.map((tier, index) => (
-            <div 
+            <Card 
               key={tier.name} 
-              className={`relative bg-white rounded-2xl border-2 p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
-                tier.popular ? 'border-blue-500 transform scale-105' : 'border-gray-200'
-              }`}
+              className={`relative ${tier.popular ? 'border-primary shadow-glow' : ''}`}
             >
               {tier.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
-                    ⭐ Most Popular
-                  </span>
-                </div>
+                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  Most Popular
+                </Badge>
               )}
               
-              <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-blue-600 mb-3">{tier.name}</h3>
-                <div className="mb-2">
-                  <span className="text-3xl font-bold text-gray-900">{tier.price}</span>
-                </div>
-                <p className="text-gray-600 text-sm font-medium">
-                  {tier.description}
-                </p>
-              </div>
-
-              <div className="space-y-3 mb-8">
-                {tier.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-start space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <span className="text-sm text-gray-700 leading-relaxed">{feature}</span>
+              <CardHeader className="text-center pb-6">
+                <div className="flex justify-center mb-4">
+                  <div className="p-3 bg-primary/10 rounded-lg text-primary">
+                    {tier.icon}
                   </div>
-                ))}
-              </div>
+                </div>
+                <CardTitle className="text-2xl">{tier.name}</CardTitle>
+                <div className="flex items-center justify-center space-x-1">
+                  <span className="text-4xl font-bold">{tier.price}</span>
+                </div>
+                <CardDescription className="text-base">
+                  {tier.description}
+                </CardDescription>
+              </CardHeader>
 
-              <Button 
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200" 
-                onClick={() => handleSubscribe(tier.priceId)}
-              >
-                Get Started Now
-              </Button>
-            </div>
+              <CardContent className="space-y-6">
+                <ul className="space-y-3">
+                  {tier.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center space-x-3">
+                      <Check className="h-5 w-5 text-success flex-shrink-0" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Button 
+                  className="w-full" 
+                  variant={tier.popular ? "default" : "outline"}
+                  onClick={() => handleSubscribe(tier.priceId)}
+                >
+                  Get Started
+                </Button>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-gray-600 text-sm">
-            All plans include access to real-time signals, technical analysis, and market insights.
+          <p className="text-muted-foreground">
+            All plans include a 7-day free trial. Cancel anytime.
           </p>
         </div>
       </div>
