@@ -28,7 +28,10 @@ export const AuthForm = () => {
   }, [user, navigate]);
 
   const handleSubmit = async (mode: 'signin' | 'signup') => {
+    console.log('handleSubmit called with:', mode, email, password);
+    
     if (!email || !password) {
+      console.log('Missing email or password:', { email: !!email, password: !!password });
       toast({
         title: "Missing Information",
         description: "Please fill in all fields",
@@ -132,7 +135,10 @@ export const AuthForm = () => {
                 </div>
               </div>
               <Button
-                onClick={() => handleSubmit('signin')}
+                onClick={() => {
+                  console.log('Sign In button clicked');
+                  handleSubmit('signin');
+                }}
                 className="w-full"
                 disabled={loading}
               >
