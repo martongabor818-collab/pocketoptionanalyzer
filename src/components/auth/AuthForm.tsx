@@ -22,7 +22,8 @@ export const AuthForm = () => {
   // Redirect if user is already authenticated
   useEffect(() => {
     if (user) {
-      navigate('/');
+      console.log('User detected, redirecting to home:', user.email);
+      navigate('/', { replace: true });
     }
   }, [user, navigate]);
 
@@ -66,12 +67,8 @@ export const AuthForm = () => {
             : "You've been signed in successfully",
         });
         
-        // Small delay to ensure auth state is updated before navigation
-        if (mode === 'signin') {
-          setTimeout(() => {
-            navigate('/');
-          }, 100);
-        }
+        // For signin, let the useEffect handle navigation after auth state updates
+        console.log('Authentication successful, waiting for auth state to update...');
       }
     } catch (error) {
       toast({
