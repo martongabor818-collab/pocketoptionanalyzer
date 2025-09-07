@@ -18,50 +18,66 @@ interface PricingTier {
 
 const pricingTiers: PricingTier[] = [
   {
-    name: "Basic",
-    price: "$9.99",
-    description: "Perfect for beginners",
+    name: "24-Hour Pass",
+    price: "€7.00",
+    description: "Perfect for testing",
     features: [
-      "10 AI analyses per day",
-      "M5 chart signals",
-      "Basic trend detection",
-      "Email support"
+      "🎯 Total access to premium signals",
+      "📊 Complete coverage of all assets",
+      "🧠 Advanced AI analysis in real-time",
+      "⚡ Instant push notifications"
     ],
+    popular: true,
     icon: <Star className="h-6 w-6" />,
-    priceId: "basic_monthly"
+    priceId: "24_hour_pass"
   },
   {
-    name: "Pro",
-    price: "$29.99",
-    description: "For serious traders",
+    name: "48-Hour Pass",
+    price: "€12.00",
+    description: "Smart choice for weekend traders",
     features: [
-      "100 AI analyses per day",
-      "All timeframes (M1, M5, M15)",
-      "Advanced pattern recognition",
-      "Risk management signals",
-      "Priority support",
-      "Trade history tracking"
+      "🎯 Total access to premium signals",
+      "📊 Complete coverage of all assets",
+      "🧠 Advanced AI analysis in real-time",
+      "⚡ Instant push notifications",
+      "🎧 Priority customer support 24/7"
+    ],
+    icon: <Zap className="h-6 w-6" />,
+    priceId: "48_hour_pass"
+  },
+  {
+    name: "Weekly",
+    price: "€30.00",
+    description: "Best choice for active traders",
+    features: [
+      "🎯 Total access to premium signals",
+      "📊 Complete coverage of all assets",
+      "🧠 Advanced AI analysis in real-time",
+      "⚡ Instant push notifications",
+      "🎧 Priority customer support 24/7",
+      "📈 In-depth market analysis",
+      "🛡️ Risk management strategies"
     ],
     popular: true,
     icon: <Zap className="h-6 w-6" />,
-    priceId: "pro_monthly"
+    priceId: "weekly_plan"
   },
   {
-    name: "Elite",
-    price: "$79.99",
-    description: "Professional trading suite",
+    name: "Monthly",
+    price: "€85.00",
+    description: "Most economical for long-term",
     features: [
-      "Unlimited AI analyses",
-      "All timeframes + custom alerts",
-      "Machine learning insights",
-      "Advanced risk analytics",
-      "24/7 priority support",
-      "Custom trading strategies",
-      "API access",
-      "Personal trading coach"
+      "🎯 Total access to premium signals",
+      "📊 Complete coverage of all assets",
+      "🧠 Advanced AI analysis in real-time",
+      "⚡ Instant push notifications",
+      "🎧 Dedicated VIP customer support",
+      "📊 Institutional-grade market analysis",
+      "🔧 Advanced risk management strategies",
+      "👨‍💼 Personal trading advisor"
     ],
     icon: <Crown className="h-6 w-6" />,
-    priceId: "elite_monthly"
+    priceId: "monthly_plan"
   }
 ];
 
@@ -99,73 +115,62 @@ export const PricingSection = () => {
   };
 
   return (
-    <section className="py-20 px-4">
+    <section className="py-20 px-4 bg-gradient-to-br from-background to-secondary/20">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <Badge variant="secondary" className="mb-4">
-            Choose Your Plan
-          </Badge>
-          <h2 className="text-4xl font-bold mb-4">
-            Simple, Transparent Pricing
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-6 text-primary">
+            Unlock premium trading signals and improve your strategy.
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start with our free trial, then choose the plan that fits your trading style
-          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {pricingTiers.map((tier, index) => (
-            <Card 
+            <div 
               key={tier.name} 
-              className={`relative ${tier.popular ? 'border-primary shadow-glow' : ''}`}
+              className={`relative bg-white rounded-2xl border-2 p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                tier.popular ? 'border-blue-500 transform scale-105' : 'border-gray-200'
+              }`}
             >
               {tier.popular && (
-                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  Most Popular
-                </Badge>
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                    ⭐ Most Popular
+                  </span>
+                </div>
               )}
               
-              <CardHeader className="text-center pb-6">
-                <div className="flex justify-center mb-4">
-                  <div className="p-3 bg-primary/10 rounded-lg text-primary">
-                    {tier.icon}
-                  </div>
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-blue-600 mb-3">{tier.name}</h3>
+                <div className="mb-2">
+                  <span className="text-3xl font-bold text-gray-900">{tier.price}</span>
                 </div>
-                <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                <div className="flex items-center justify-center space-x-1">
-                  <span className="text-4xl font-bold">{tier.price}</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-                <CardDescription className="text-base">
+                <p className="text-gray-600 text-sm font-medium">
                   {tier.description}
-                </CardDescription>
-              </CardHeader>
+                </p>
+              </div>
 
-              <CardContent className="space-y-6">
-                <ul className="space-y-3">
-                  {tier.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center space-x-3">
-                      <Check className="h-5 w-5 text-success flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="space-y-3 mb-8">
+                {tier.features.map((feature, featureIndex) => (
+                  <div key={featureIndex} className="flex items-start space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <span className="text-sm text-gray-700 leading-relaxed">{feature}</span>
+                  </div>
+                ))}
+              </div>
 
-                <Button 
-                  className="w-full" 
-                  variant={tier.popular ? "default" : "outline"}
-                  onClick={() => handleSubscribe(tier.priceId)}
-                >
-                  Get Started
-                </Button>
-              </CardContent>
-            </Card>
+              <Button 
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition-colors duration-200" 
+                onClick={() => handleSubscribe(tier.priceId)}
+              >
+                Get Started Now
+              </Button>
+            </div>
           ))}
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-muted-foreground">
-            All plans include a 7-day free trial. Cancel anytime.
+          <p className="text-gray-600 text-sm">
+            All plans include access to real-time signals, technical analysis, and market insights.
           </p>
         </div>
       </div>
