@@ -66,9 +66,11 @@ export const AuthForm = () => {
             : "You've been signed in successfully",
         });
         
-        // Redirect to home page after successful authentication
+        // Small delay to ensure auth state is updated before navigation
         if (mode === 'signin') {
-          navigate('/');
+          setTimeout(() => {
+            navigate('/');
+          }, 100);
         }
       }
     } catch (error) {
